@@ -2,7 +2,7 @@
 
 ## Phase 0 — Project Foundation
 
-状態: **基盤作成済み / ローカルGodot確認待ち**
+状態: **基盤作成済み / Windows起動確認済み / Godotバージョン固定待ち**
 
 目的: 実装を始める前に、壊れにくい開発基盤を作る。
 
@@ -14,17 +14,18 @@
 - [x] MVP範囲
 - [x] セーブ形式方針
 - [ ] Godotバージョン固定
-- [ ] Windows起動確認
+- [x] Windows起動確認
 
 完了条件:
 GodotでRepository内のプロジェクトを開ける。
 
 ## Phase 1 — First-Person Controller
 
-状態: **実装済み / 実機確認待ち**
+状態: **実装済み / Windows実機でWASD確認済み / 残り操作確認待ち**
 
 - [x] プレイヤーシーン
 - [x] WASD移動
+- [x] Windows実機でWASD移動確認
 - [x] マウスルック
 - [x] 重力
 - [x] 衝突
@@ -149,3 +150,15 @@ GodotでRepository内のプロジェクトを開ける。
 ## 1.0候補
 
 Prototypeを通して面白さが確認できてから正式版範囲を再定義する。最初から1.0の全機能を固定しない。
+
+
+## 2026-09-24 Windows実機確認
+
+Game Dev Hub経由でDeep Factoryを起動し、Windows実機でゲームが起動できることとWASD移動を確認した。
+
+現時点でこの記録から確認済みとして扱うのは次だけ。
+
+- WindowsでGameを起動できる
+- WASD移動が反応する
+
+マウス視点、衝突、Escによるカーソル切替などは、別途明示確認できるまで実機確認済みとは扱わない。
