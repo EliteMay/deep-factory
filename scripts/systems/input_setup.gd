@@ -11,10 +11,13 @@ const DEFAULT_BINDINGS := {
 
 func _ready() -> void:
 	for action_name in DEFAULT_BINDINGS:
-		_ensure_key_action(action_name, DEFAULT_BINDINGS[action_name])
+		_ensure_key_action(
+			StringName(action_name),
+			int(DEFAULT_BINDINGS[action_name])
+		)
 
 
-func _ensure_key_action(action_name: StringName, physical_keycode: Key) -> void:
+func _ensure_key_action(action_name: StringName, physical_keycode: int) -> void:
 	if not InputMap.has_action(action_name):
 		InputMap.add_action(action_name)
 
