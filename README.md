@@ -25,6 +25,7 @@
 ## 開発環境
 
 - Engine: Godot 4.x
+- Renderer: Forward+
 - Language: GDScript
 - Target: Windows
 - Version control: Git / GitHub
@@ -72,10 +73,17 @@ Godotの正確な開発バージョンは、ローカル環境確認後に固定
 - `docs/MVP.md` — 最小版の範囲と完成条件
 - `docs/ROADMAP.md` — 開発順序
 - `docs/SAVE_FORMAT.md` — セーブデータ方針
+- `docs/PROJECT_STRUCTURE.md` — プロジェクト構成
 
 ## 起動方法
 
-Godotプロジェクト作成後に手順を確定します。
+1. このRepositoryをPCへCloneする
+2. Godot Project Managerを開く
+3. **Import** を選ぶ
+4. Repository直下の `project.godot` を選ぶ
+5. プロジェクトを開く
+
+現段階ではメインシーン未実装のため、ゲーム本編はまだ起動しません。
 
 ## Windowsビルド
 
