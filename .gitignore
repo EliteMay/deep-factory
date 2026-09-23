@@ -20,3 +20,7 @@ desktop.ini
 *.log
 *.tmp
 *.temp
+
+# Development launcher
+tools/dev-launcher/node_modules/
+tools/dev-launcher/dist/
