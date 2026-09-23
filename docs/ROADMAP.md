@@ -2,33 +2,41 @@
 
 ## Phase 0 — Project Foundation
 
+状態: **基盤作成済み / ローカルGodot確認待ち**
+
 目的: 実装を始める前に、壊れにくい開発基盤を作る。
 
-- Repository初期化
-- Godotプロジェクト初期化
-- 基本フォルダ構成
-- README
-- ゲーム仕様
-- MVP範囲
-- セーブ形式方針
-- Godotバージョン固定
-- Windows起動確認
+- [x] Repository初期化
+- [x] Godotプロジェクト初期化
+- [x] 基本フォルダ構成
+- [x] README
+- [x] ゲーム仕様
+- [x] MVP範囲
+- [x] セーブ形式方針
+- [ ] Godotバージョン固定
+- [ ] Windows起動確認
 
 完了条件:
 GodotでRepository内のプロジェクトを開ける。
 
 ## Phase 1 — First-Person Controller
 
-- プレイヤーシーン
-- WASD移動
-- マウスルック
-- 重力
-- 衝突
-- 簡易テストマップ
-- インタラクション用RayCast
+状態: **実装済み / 実機確認待ち**
+
+- [x] プレイヤーシーン
+- [x] WASD移動
+- [x] マウスルック
+- [x] 重力
+- [x] 衝突
+- [x] 簡易テストマップ
+- [x] インタラクション用RayCast
+- [x] 簡易クロスヘア
+- [x] Escでカーソル切替
 
 完了条件:
 小さな3D空間を問題なく歩き回れる。
+
+ローカルGodotで起動し、移動・視点・衝突・カーソル切替を確認できた時点でPhase 1完了とする。
 
 ## Phase 2 — Mining
 
