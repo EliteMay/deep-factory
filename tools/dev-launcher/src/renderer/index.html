@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'"
+  >
+  <title>Deep Factory Launcher</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">DEEP FACTORY</p>
+        <h1>開発ランチャー</h1>
+        <p class="subtitle">GitHub更新からGodot起動まで、ここだけで進める。</p>
+      </div>
+      <button class="button button-quiet" id="refresh-button" type="button">状態を更新</button>
+    </header>
+
+    <section class="hero" aria-labelledby="hero-title">
+      <div>
+        <p class="section-kicker" id="overall-label">確認中</p>
+        <h2 id="hero-title">開発を始める準備を確認しています</h2>
+        <p id="hero-description">
+          Repository、Git、Godotの状態をまとめて確認します。
+        </p>
+      </div>
+      <div class="hero-actions">
+        <button class="button button-primary button-large" id="start-button" type="button">
+          開発を開始
+        </button>
+        <button class="button button-secondary button-large" id="run-button" type="button">
+          ゲームを起動
+        </button>
+      </div>
+    </section>
+
+    <section class="status-grid" aria-label="開発環境の状態">
+      <article class="status-card" id="git-card">
+        <div class="status-heading">
+          <span class="status-dot" id="git-dot"></span>
+          <h3>Git</h3>
+        </div>
+        <p class="status-value" id="git-value">確認中</p>
+        <p class="status-detail" id="git-detail">GitHub同期に使用します。</p>
+      </article>
+
+      <article class="status-card" id="repo-card">
+        <div class="status-heading">
+          <span class="status-dot" id="repo-dot"></span>
+          <h3>Repository</h3>
+        </div>
+        <p class="status-value" id="repo-value">確認中</p>
+        <p class="status-detail path-text" id="repo-detail">Deep Factoryの場所を確認しています。</p>
+      </article>
+
+      <article class="status-card" id="godot-card">
+        <div class="status-heading">
+          <span class="status-dot" id="godot-dot"></span>
+          <h3>Godot</h3>
+        </div>
+        <p class="status-value" id="godot-value">確認中</p>
+        <p class="status-detail path-text" id="godot-detail">Godotの場所を確認しています。</p>
+      </article>
+    </section>
+
+    <section class="workspace-grid">
+      <article class="panel actions-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="section-kicker">操作</p>
+            <h2>よく使う操作</h2>
+          </div>
+        </div>
+
+        <div class="action-list">
+          <button class="action-row" id="sync-button" type="button">
+            <span>
+              <strong>GitHubから最新版にする</strong>
+              <small>安全にfetch + fast-forward更新</small>
+            </span>
+            <span class="action-arrow">→</span>
+          </button>
+
+          <button class="action-row" id="editor-button" type="button">
+            <span>
+              <strong>Godotで開く</strong>
+              <small>Deep FactoryをGodot Editorで開く</small>
+            </span>
+            <span class="action-arrow">→</span>
+          </button>
+
+          <button class="action-row" id="folder-button" type="button">
+            <span>
+              <strong>プロジェクトフォルダを開く</strong>
+              <small>エクスプローラーでRepositoryを表示</small>
+            </span>
+            <span class="action-arrow">→</span>
+          </button>
+
+          <button class="action-row" id="github-button" type="button">
+            <span>
+              <strong>GitHubを開く</strong>
+              <small>EliteMay/deep-factoryをブラウザで開く</small>
+            </span>
+            <span class="action-arrow">→</span>
+          </button>
+        </div>
+
+        <div class="setup-actions">
+          <button class="button button-quiet" id="choose-repository-button" type="button">
+            Repositoryを選び直す
+          </button>
+          <button class="button button-quiet" id="choose-godot-button" type="button">
+            Godotを選ぶ
+          </button>
+        </div>
+      </article>
+
+      <article class="panel log-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="section-kicker">ログ</p>
+            <h2>いま何をしたか</h2>
+          </div>
+          <button class="button button-quiet button-small" id="clear-log-button" type="button">
+            消去
+          </button>
+        </div>
+        <div class="log-list" id="log-list" aria-live="polite" aria-relevant="additions">
+          <p class="log-empty" id="log-empty">まだ操作はありません。</p>
+        </div>
+      </article>
+    </section>
+
+    <footer class="footer">
+      <span id="app-version">Launcher</span>
+      <span>自動更新は、ローカル変更がない場合だけ実行します。</span>
+    </footer>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
