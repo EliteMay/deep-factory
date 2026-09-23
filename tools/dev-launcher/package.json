@@ -1,0 +1,52 @@
+{
+  "name": "deep-factory-dev-launcher",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Windows development launcher for the Deep Factory Godot project.",
+  "main": "src/main.mjs",
+  "scripts": {
+    "dev": "electron src/main.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "build:win": "electron-builder --win nsis --x64 --publish never"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "electron": "44.4.3",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "com.elitemay.deepfactory.launcher",
+    "productName": "Deep Factory Launcher",
+    "asar": true,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "package.json",
+      "README.md"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "artifactName": "deep_factory_launcher_${version}_setup.${ext}",
+      "signAndEditExecutable": true,
+      "signExecutable": false,
+      "forceCodeSigning": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Deep Factory Launcher"
+    }
+  }
+}
