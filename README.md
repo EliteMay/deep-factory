@@ -6,7 +6,7 @@
 
 ## 現在の段階
 
-現在は **プロジェクト基盤・仕様整理段階** です。まだゲーム本編の実装は開始していません。
+現在は **Prototype 0.1の初期実装段階** です。一人称3Dの移動・視点操作・衝突・簡易テストマップまで実装済みで、Windows上のGodot実機確認を進めています。
 
 最初の目標は、以下を満たす **Prototype 0.1 / MVP** の完成です。
 
@@ -75,15 +75,26 @@ Godotの正確な開発バージョンは、ローカル環境確認後に固定
 - `docs/SAVE_FORMAT.md` — セーブデータ方針
 - `docs/PROJECT_STRUCTURE.md` — プロジェクト構成
 
-## 起動方法
+## 開発開始
+
+通常は **Game Dev Hub** を使います。
+
+- Hub Repository: `EliteMay/game-dev-hub`
+- Deep FactoryはGame Dev Hubの初期登録Gameです
+- HubからRepositoryの安全確認、最新版取得、Godot Editor起動、Game直接起動を行えます
+
+Game Dev HubはDeep Factory固有の仕様を持たず、このRepositoryをSource of Truthとして扱います。
+
+### Godotから直接開く場合
 
 1. このRepositoryをPCへCloneする
 2. Godot Project Managerを開く
 3. **Import** を選ぶ
 4. Repository直下の `project.godot` を選ぶ
 5. プロジェクトを開く
+6. 右上の実行ボタンで現在のテストシーンを起動する
 
-現段階ではメインシーン未実装のため、ゲーム本編はまだ起動しません。
+現在のテストシーンでは、WASD移動・マウス視点操作・衝突・Escによるカーソル切替を確認できます。
 
 ## Windowsビルド
 
