@@ -1,4 +1,3 @@
-class_name UpgradeCatalog
 extends RefCounted
 
 const DATA_PATH := "res://data/upgrades.json"

@@ -158,7 +158,9 @@
   - SatisfactoryのHUB Terminalにある「World内の端末へEで入り、必要Cost/RewardをUIで確認する」Interaction Patternだけを参考にし、見た目や名称はコピーしない
 - [ ] Windows実機でアップグレードループ確認
   - 担当: あなた
-  - 5個の岩を採掘して鉱石を拾い、SELL端末でまとめて売って所持金が25円になることを確認する
+  - 岩以外へ照準を向けて左クリックし、「採掘対象なし」が表示されることを確認する
+  - 5個の岩を採掘し、各鉱石をEで拾うたびにHUDの鉱石数が1ずつ増えて最終的に「鉱石: 5 / 10」になることを確認する
+  - SELL端末でまとめて売り、HUDが「鉱石: 0 / 10」「所持金: ¥25」になることを確認する
   - 左側のUPGRADES端末へ照準を合わせてEを押し、3種類のアップグレード・価格・現在値が表示されることを確認する
   - 採掘速度を5円で購入し、所持金20円・現在0.25秒・「購入済み」になることを確認する
   - 所持容量を10円で購入し、所持金10円・HUDが「鉱石: 0 / 15」になることを確認する
@@ -286,3 +288,19 @@ Game Dev Hub共有パックで、Repository commit `4e8b92a7` / Godot `4.7.2.sta
 - 売却後に鉱石0 / 10・所持金5円になる
 
 このEvidenceによりPhase 3を完了とする。Phase 4はRepository側で実装済みだが、購入UI・購入後効果・ゲーム操作への復帰はWindows実機確認が終わるまでPhase 4完了とは扱わない。
+
+### 2026-09-24 Phase 4導入後のCore Loop Regression
+
+Phase 4 merge後、Windows実機で「岩は壊せるが、鉱石を拾ってもHUDカウントが増えず、空振り採掘の『採掘対象なし』も表示されない」Regressionが発生した。
+
+Game Dev Hubと同じEditorを介さないDirect StartをCIで再現した結果、`main_controller.gd` が新規 `UpgradeCatalog` のglobal class cacheへ依存し、cold startでは `Identifier "UpgradeCatalog" not declared in the current scope` でParse ErrorになっていたことをRoot Causeとして確定した。
+
+Player Scriptは正常だったため採掘・鉱石取得のDomain Logic自体は動いていたが、MainControllerが読み込まれず、Feedback signalとInventory HUD更新が失われていた。
+
+修正:
+- `UpgradeCatalog` をglobal class名で参照せず、`main_controller.gd` からScript Pathを`preload()`して使用する
+- `upgrade_catalog.gd` の `class_name` 依存を削除する
+- CIへGame Dev Hub相当のDirect Cold Startを追加する
+- Phase 2/3回帰Guardとして「空振り採掘Feedback → OreDrop取得 → Inventory/HUD更新 → 売却」を通すCore Loop Smoke Testを追加する
+
+この修正のWindows実機確認はPhase 4のUser確認Task内で再確認する。
