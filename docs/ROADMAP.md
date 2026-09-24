@@ -2,7 +2,7 @@
 
 ## Phase 0 — Project Foundation
 
-状態: **基盤作成済み / Windows起動確認済み / Godotバージョン固定待ち**
+状態: **基盤作成済み / Windows起動確認済み / Godot 4.7.2固定済み**
 
 目的: 実装を始める前に、壊れにくい開発基盤を作る。
 
@@ -13,10 +13,10 @@
 - [x] ゲーム仕様
 - [x] MVP範囲
 - [x] セーブ形式方針
-- [ ] Godotバージョン固定
-  - Game Dev Hub上部のGodot欄で、実際に使っているGodotのVersionを確認する
-  - 「ChatGPT共有パックを作る」でVersion情報を含む現在状態を共有する
-  - 確認したVersionをRepositoryの開発環境情報へ固定し、同じVersionでProjectを開けることを確認する
+- [x] Godotバージョン固定
+  - Game Dev Hub共有パックで Godot 4.7.2 stable を確認
+  - READMEの開発環境を Godot 4.7.2 stable に固定
+  - 同VersionでProjectを開けることを2026-09-24に確認済み
 - [x] Windows起動確認
 
 完了条件:
