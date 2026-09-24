@@ -4,6 +4,8 @@ signal mining_feedback(message: String, success: bool)
 signal interaction_feedback(message: String, success: bool)
 signal inventory_changed(current_count: int, capacity: int, money: int)
 signal control_state_changed(message: String, active: bool)
+signal upgrade_menu_changed(is_open: bool)
+signal upgrade_state_changed()
 
 @export_category("Movement")
 @export var move_speed: float = 5.0
@@ -29,9 +31,11 @@ var mining_cooldown_remaining: float = 0.0
 var ore_counts: Dictionary = {}
 var ore_values: Dictionary = {}
 var ore_names: Dictionary = {}
+var upgrade_levels: Dictionary = {}
 var money: int = 0
 var _wants_mouse_capture: bool = true
 var _suppress_mining_until_msec: int = 0
+var _upgrade_menu_open: bool = false
 
 
 func _ready() -> void:
@@ -44,9 +48,12 @@ func _ready() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-		control_state_changed.emit("ゲーム画面をクリックして操作開始", false)
+		if not _upgrade_menu_open:
+			control_state_changed.emit("ゲーム画面をクリックして操作開始", false)
 	elif what == NOTIFICATION_APPLICATION_FOCUS_IN:
-		if _wants_mouse_capture:
+		if _upgrade_menu_open:
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		elif _wants_mouse_capture:
 			_suppress_mining_until_msec = Time.get_ticks_msec() + 200
 			call_deferred("_capture_mouse")
 		else:
@@ -54,6 +61,12 @@ func _notification(what: int) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if _upgrade_menu_open:
+		if event.is_action_pressed("toggle_cursor"):
+			close_upgrade_menu()
+			get_viewport().set_input_as_handled()
+		return
+
 	if event.is_action_pressed("toggle_cursor"):
 		_toggle_cursor()
 		get_viewport().set_input_as_handled()
@@ -107,16 +120,20 @@ func _physics_process(delta: float) -> void:
 	elif velocity.y < 0.0:
 		velocity.y = 0.0
 
-	var input_vector := Input.get_vector(
-		"move_left",
-		"move_right",
-		"move_forward",
-		"move_backward"
-	)
+	var input_vector: Vector2 = Vector2.ZERO
+	if not _upgrade_menu_open:
+		input_vector = Input.get_vector(
+			"move_left",
+			"move_right",
+			"move_forward",
+			"move_backward"
+		)
 
-	var direction := (transform.basis * Vector3(input_vector.x, 0.0, input_vector.y)).normalized()
-	var target_velocity := direction * move_speed
-	var change_rate := acceleration if direction != Vector3.ZERO else deceleration
+	var direction: Vector3 = (
+		transform.basis * Vector3(input_vector.x, 0.0, input_vector.y)
+	).normalized()
+	var target_velocity: Vector3 = direction * move_speed
+	var change_rate: float = acceleration if direction != Vector3.ZERO else deceleration
 
 	velocity.x = move_toward(velocity.x, target_velocity.x, change_rate * delta)
 	velocity.z = move_toward(velocity.z, target_velocity.z, change_rate * delta)
@@ -132,6 +149,10 @@ func _request_gameplay_focus() -> void:
 
 
 func _capture_mouse() -> void:
+	if _upgrade_menu_open:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		return
+
 	var window := get_window()
 	if window == null or not window.has_focus():
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -145,7 +166,9 @@ func _capture_mouse() -> void:
 
 
 func refresh_control_state() -> void:
-	if _gameplay_input_active():
+	if _upgrade_menu_open:
+		control_state_changed.emit("", true)
+	elif _gameplay_input_active():
 		control_state_changed.emit("", true)
 	elif _wants_mouse_capture:
 		control_state_changed.emit("ゲーム画面をクリックして操作開始", false)
@@ -156,10 +179,112 @@ func refresh_control_state() -> void:
 func _gameplay_input_active() -> bool:
 	var window := get_window()
 	return (
-		window != null
+		not _upgrade_menu_open
+		and window != null
 		and window.has_focus()
 		and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
 	)
+
+
+func open_upgrade_menu() -> void:
+	if _upgrade_menu_open:
+		return
+
+	_upgrade_menu_open = true
+	_wants_mouse_capture = false
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	control_state_changed.emit("", true)
+	upgrade_menu_changed.emit(true)
+
+
+func close_upgrade_menu() -> void:
+	if not _upgrade_menu_open:
+		return
+
+	_upgrade_menu_open = false
+	_wants_mouse_capture = true
+	upgrade_menu_changed.emit(false)
+
+	if DisplayServer.get_name() != "headless":
+		var window := get_window()
+		if window:
+			window.grab_focus()
+		call_deferred("_capture_mouse")
+
+
+func get_upgrade_level(upgrade_id: StringName) -> int:
+	return int(upgrade_levels.get(String(upgrade_id), 0))
+
+
+func purchase_upgrade(upgrade_id: StringName, definition: Dictionary) -> Dictionary:
+	var upgrade_key: String = String(upgrade_id)
+	var display_name: String = String(definition.get("name", upgrade_key))
+	var max_level: int = int(definition.get("max_level", 1))
+	var current_level: int = get_upgrade_level(upgrade_id)
+	var cost: int = maxi(0, int(definition.get("cost", 0)))
+
+	if current_level >= max_level:
+		interaction_feedback.emit(display_name + "は購入済み", false)
+		return {
+			"purchased": false,
+			"reason": "max_level",
+		}
+
+	if money < cost:
+		interaction_feedback.emit(
+			"所持金が足りません　必要 ¥%d" % cost,
+			false
+		)
+		return {
+			"purchased": false,
+			"reason": "insufficient_money",
+		}
+
+	var effect_variant: Variant = definition.get("effect", {})
+	if not (effect_variant is Dictionary):
+		interaction_feedback.emit("アップグレードデータが不正です", false)
+		return {
+			"purchased": false,
+			"reason": "invalid_effect",
+		}
+
+	var effect: Dictionary = effect_variant as Dictionary
+	if not _apply_upgrade_effect(effect):
+		interaction_feedback.emit("アップグレード効果を適用できません", false)
+		return {
+			"purchased": false,
+			"reason": "unsupported_effect",
+		}
+
+	money -= cost
+	upgrade_levels[upgrade_key] = current_level + 1
+	_emit_inventory_changed()
+	upgrade_state_changed.emit()
+	interaction_feedback.emit(display_name + "を購入した", true)
+
+	return {
+		"purchased": true,
+		"reason": "ok",
+		"level": current_level + 1,
+	}
+
+
+func _apply_upgrade_effect(effect: Dictionary) -> bool:
+	var effect_type: String = String(effect.get("type", ""))
+	var value: float = float(effect.get("value", 0.0))
+
+	match effect_type:
+		"set_mining_cooldown":
+			mining_cooldown = maxf(0.05, value)
+			return true
+		"add_inventory_capacity":
+			inventory_capacity = maxi(1, inventory_capacity + int(value))
+			return true
+		"add_move_speed":
+			move_speed = maxf(0.1, move_speed + value)
+			return true
+		_:
+			return false
 
 
 func _try_mine() -> void:
@@ -224,9 +349,9 @@ func add_ore(
 		interaction_feedback.emit("バッグがいっぱい", false)
 		return 0
 
-	var current := int(ore_counts.get(ore_id, 0))
+	var current: int = int(ore_counts.get(ore_id, 0))
 	ore_counts[ore_id] = current + accepted
-	ore_values[ore_id] = max(0, sell_value)
+	ore_values[ore_id] = maxi(0, sell_value)
 	ore_names[ore_id] = display_name
 
 	if accepted < requested_amount:
@@ -245,7 +370,7 @@ func add_ore(
 
 
 func sell_all_ore() -> Dictionary:
-	var sold_count := inventory_count()
+	var sold_count: int = inventory_count()
 	if sold_count <= 0:
 		interaction_feedback.emit("売る鉱石がありません", false)
 		return {
@@ -253,7 +378,7 @@ func sell_all_ore() -> Dictionary:
 			"value": 0,
 		}
 
-	var total_value := 0
+	var total_value: int = 0
 	for ore_id in ore_counts:
 		total_value += int(ore_counts[ore_id]) * int(ore_values.get(ore_id, 0))
 
@@ -275,7 +400,7 @@ func sell_all_ore() -> Dictionary:
 
 
 func inventory_count() -> int:
-	var total := 0
+	var total: int = 0
 	for value in ore_counts.values():
 		total += int(value)
 	return total
@@ -289,7 +414,10 @@ func _toggle_cursor() -> void:
 	if _wants_mouse_capture:
 		_wants_mouse_capture = false
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-		control_state_changed.emit("カーソル表示中。ゲーム画面をクリックで操作へ戻る", false)
+		control_state_changed.emit(
+			"カーソル表示中。ゲーム画面をクリックで操作へ戻る",
+			false
+		)
 	else:
 		_wants_mouse_capture = true
 		_suppress_mining_until_msec = Time.get_ticks_msec() + 200
