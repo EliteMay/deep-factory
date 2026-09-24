@@ -1,0 +1,36 @@
+name: Godot CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Godot 4.7.2
+        shell: bash
+        run: |
+          curl --fail --location --retry 3             --output godot.zip             https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          unzip -q godot.zip
+          chmod +x Godot_v4.7.2-stable_linux.x86_64
+
+      - name: Import project
+        shell: bash
+        run: |
+          ./Godot_v4.7.2-stable_linux.x86_64             --headless             --path .             --import
+
+      - name: Load main scene
+        shell: bash
+        run: |
+          ./Godot_v4.7.2-stable_linux.x86_64             --headless             --path .             --quit-after 3
