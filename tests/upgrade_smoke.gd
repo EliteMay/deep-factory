@@ -1,5 +1,7 @@
 extends Node
 
+const UpgradeCatalogScript = preload("res://scripts/systems/upgrade_catalog.gd")
+
 var _failed: bool = false
 
 
@@ -32,7 +34,7 @@ func _run() -> void:
 		_finish()
 		return
 
-	var definitions: Dictionary = UpgradeCatalog.load_all()
+	var definitions: Dictionary = UpgradeCatalogScript.load_all()
 	for key in ["mining_speed", "inventory_capacity", "move_speed"]:
 		if not definitions.has(key):
 			_fail("missing upgrade definition: " + key)
