@@ -25,6 +25,17 @@ jobs:
           unzip -q godot.zip
           chmod +x Godot_v4.7.2-stable_linux.x86_64
 
+      - name: Direct cold start like Game Dev Hub
+        shell: bash
+        run: |
+          set -o pipefail
+          rm -rf .godot
+          timeout 20s ./Godot_v4.7.2-stable_linux.x86_64 --headless --path . --quit-after 3 2>&1 | tee cold-start.log
+          if grep -Eq "SCRIPT ERROR|(^|[[:space:]])ERROR:" cold-start.log; then
+            echo "Direct Game Dev Hub style start contains an error."
+            exit 1
+          fi
+
       - name: Import project
         shell: bash
         run: |
@@ -58,3 +69,11 @@ jobs:
           set -o pipefail
           timeout 20s ./Godot_v4.7.2-stable_linux.x86_64 --headless --path . --scene res://tests/upgrade_smoke.tscn 2>&1 | tee upgrade-smoke.log
           grep -q "UPGRADE_SMOKE: PASS" upgrade-smoke.log
+
+
+      - name: Run core loop regression smoke test
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 20s ./Godot_v4.7.2-stable_linux.x86_64 --headless --path . --scene res://tests/core_loop_smoke.tscn 2>&1 | tee core-loop-smoke.log
+          grep -q "CORE_LOOP_SMOKE: PASS" core-loop-smoke.log
