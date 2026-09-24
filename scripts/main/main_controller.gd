@@ -8,7 +8,7 @@ var _feedback_token: int = 0
 
 func _ready() -> void:
 	if player.has_signal("mining_feedback"):
-		player.mining_feedback.connect(_on_mining_feedback)
+		player.connect("mining_feedback", Callable(self, "_on_mining_feedback"))
 
 	mining_feedback.visible = false
 
