@@ -1,0 +1,30 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/ore_drop.gd" id="1_ore"]
+
+[sub_resource type="StandardMaterial3D" id="Material_ore"]
+albedo_color = Color(0.72, 0.42, 0.18, 1)
+metallic = 0.35
+roughness = 0.48
+
+[sub_resource type="SphereMesh" id="SphereMesh_ore"]
+material = SubResource("Material_ore")
+radius = 0.26
+height = 0.5
+radial_segments = 12
+rings = 6
+
+[sub_resource type="SphereShape3D" id="SphereShape_ore"]
+radius = 0.27
+
+[node name="OreDrop" type="RigidBody3D"]
+mass = 0.35
+linear_damp = 1.2
+angular_damp = 1.5
+script = ExtResource("1_ore")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_ore")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape_ore")

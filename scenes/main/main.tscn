@@ -1,6 +1,8 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="1_player"]
+[ext_resource type="Script" path="res://scripts/main/main_controller.gd" id="2_main"]
+[ext_resource type="PackedScene" path="res://scenes/resources/mineable_rock.tscn" id="3_rock"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -35,6 +37,7 @@ metallic = 0.35
 roughness = 0.58
 
 [node name="Main" type="Node3D"]
+script = ExtResource("2_main")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_main")
@@ -88,6 +91,9 @@ mesh = SubResource("BoxMesh_block")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="TestBlockC"]
 shape = SubResource("BoxShape_block")
 
+[node name="MiningRock" parent="." instance=ExtResource("3_rock")]
+position = Vector3(0, 0, 0)
+
 [node name="Player" parent="." instance=ExtResource("1_player")]
 position = Vector3(0, 0.05, 5)
 
@@ -109,11 +115,27 @@ text = "+"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="MiningFeedback" type="Label" parent="HUD"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -210.0
+offset_top = 42.0
+offset_right = 210.0
+offset_bottom = 72.0
+theme_override_font_sizes/font_size = 16
+text = "採掘フィードバック"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="Controls" type="Label" parent="HUD"]
 offset_left = 18.0
 offset_top = 18.0
-offset_right = 430.0
+offset_right = 560.0
 offset_bottom = 54.0
 theme_override_colors/font_color = Color(0.72, 0.8, 0.87, 0.92)
 theme_override_font_sizes/font_size = 16
-text = "WASD: 移動　マウス: 視点　Esc: カーソル切替"
+text = "WASD: 移動　マウス: 視点　左クリック: 採掘　Esc: カーソル切替"

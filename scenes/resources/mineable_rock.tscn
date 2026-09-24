@@ -1,0 +1,29 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/mineable_rock.gd" id="1_rock"]
+
+[sub_resource type="StandardMaterial3D" id="Material_rock"]
+albedo_color = Color(0.32, 0.29, 0.25, 1)
+roughness = 0.95
+
+[sub_resource type="SphereMesh" id="SphereMesh_rock"]
+material = SubResource("Material_rock")
+radius = 0.85
+height = 1.55
+radial_segments = 14
+rings = 8
+
+[sub_resource type="SphereShape3D" id="SphereShape_rock"]
+radius = 0.82
+
+[node name="MineableRock" type="StaticBody3D"]
+script = ExtResource("1_rock")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.78, 0)
+scale = Vector3(1.0, 0.82, 1.08)
+mesh = SubResource("SphereMesh_rock")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.78, 0)
+shape = SubResource("SphereShape_rock")
