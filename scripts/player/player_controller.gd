@@ -37,7 +37,8 @@ var _suppress_mining_until_msec: int = 0
 func _ready() -> void:
 	set_process_input(true)
 	_emit_inventory_changed()
-	call_deferred("_request_gameplay_focus")
+	if DisplayServer.get_name() != "headless":
+		call_deferred("_request_gameplay_focus")
 
 
 func _notification(what: int) -> void:
@@ -66,10 +67,11 @@ func _input(event: InputEvent) -> void:
 	):
 		_wants_mouse_capture = true
 		_suppress_mining_until_msec = Time.get_ticks_msec() + 200
-		var window := get_window()
-		if window:
-			window.grab_focus()
-		call_deferred("_capture_mouse")
+		if DisplayServer.get_name() != "headless":
+			var window := get_window()
+			if window:
+				window.grab_focus()
+			call_deferred("_capture_mouse")
 		get_viewport().set_input_as_handled()
 		return
 
@@ -291,7 +293,8 @@ func _toggle_cursor() -> void:
 	else:
 		_wants_mouse_capture = true
 		_suppress_mining_until_msec = Time.get_ticks_msec() + 200
-		var window := get_window()
-		if window:
-			window.grab_focus()
-		call_deferred("_capture_mouse")
+		if DisplayServer.get_name() != "headless":
+			var window := get_window()
+			if window:
+				window.grab_focus()
+			call_deferred("_capture_mouse")
