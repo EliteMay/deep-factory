@@ -1,7 +1,10 @@
 ; Engine configuration file.
-; Edit through the Godot editor when possible.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
 ;
-; Deep Factory starts as a small 3D prototype.
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
 
 config_version=5
 
@@ -9,6 +12,7 @@ config_version=5
 
 config/name="Deep Factory"
 run/main_scene="res://scenes/main/main.tscn"
+config/features=PackedStringArray("4.7")
 
 [autoload]
 
@@ -20,7 +24,3 @@ window/size/viewport_width=1280
 window/size/viewport_height=720
 window/size/window_width_override=1280
 window/size/window_height_override=720
-
-[rendering]
-
-renderer/rendering_method="forward_plus"
