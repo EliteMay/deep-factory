@@ -1,0 +1,32 @@
+{
+  "mining_speed": {
+    "name": "採掘速度",
+    "description": "採掘間隔を0.45秒から0.25秒へ短縮する",
+    "cost": 5,
+    "max_level": 1,
+    "effect": {
+      "type": "set_mining_cooldown",
+      "value": 0.25
+    }
+  },
+  "inventory_capacity": {
+    "name": "所持容量",
+    "description": "鉱石バッグ容量を10から15へ増やす",
+    "cost": 10,
+    "max_level": 1,
+    "effect": {
+      "type": "add_inventory_capacity",
+      "value": 5
+    }
+  },
+  "move_speed": {
+    "name": "移動速度",
+    "description": "移動速度を5.0から6.5へ上げる",
+    "cost": 10,
+    "max_level": 1,
+    "effect": {
+      "type": "add_move_speed",
+      "value": 1.5
+    }
+  }
+}
