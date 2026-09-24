@@ -1,6 +1,8 @@
 extends CharacterBody3D
 
 signal mining_feedback(message: String, success: bool)
+signal interaction_feedback(message: String, success: bool)
+signal inventory_changed(current_count: int, capacity: int, money: int)
 
 @export_category("Movement")
 @export var move_speed: float = 5.0
@@ -15,15 +17,23 @@ signal mining_feedback(message: String, success: bool)
 @export var mining_damage: float = 1.0
 @export_range(0.05, 2.0, 0.05) var mining_cooldown: float = 0.45
 
+@export_category("Inventory")
+@export_range(1, 999, 1) var inventory_capacity: int = 10
+
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var interaction_ray: RayCast3D = $CameraPivot/Camera3D/InteractionRay
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var mining_cooldown_remaining: float = 0.0
+var ore_counts: Dictionary = {}
+var ore_values: Dictionary = {}
+var ore_names: Dictionary = {}
+var money: int = 0
 
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	_emit_inventory_changed()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -39,6 +49,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED
 	):
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		get_viewport().set_input_as_handled()
+		return
+
+	if event.is_action_pressed("interact") and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		_try_interact()
 		get_viewport().set_input_as_handled()
 		return
 
@@ -114,6 +129,95 @@ func _try_mine() -> void:
 		"採掘成功　耐久 %.0f / %.0f" % [remaining, maximum],
 		true
 	)
+
+
+func _try_interact() -> void:
+	interaction_ray.force_raycast_update()
+
+	if not interaction_ray.is_colliding():
+		interaction_feedback.emit("操作対象なし", false)
+		return
+
+	var collider := interaction_ray.get_collider()
+	if collider == null or not collider.has_method("interact"):
+		interaction_feedback.emit("操作対象なし", false)
+		return
+
+	collider.call("interact", self)
+
+
+func add_ore(
+	ore_id: StringName,
+	display_name: String,
+	sell_value: int,
+	requested_amount: int
+) -> int:
+	var available := max(0, inventory_capacity - inventory_count())
+	var accepted := int(min(max(requested_amount, 0), available))
+
+	if accepted <= 0:
+		interaction_feedback.emit("バッグがいっぱい", false)
+		return 0
+
+	var current := int(ore_counts.get(ore_id, 0))
+	ore_counts[ore_id] = current + accepted
+	ore_values[ore_id] = max(0, sell_value)
+	ore_names[ore_id] = display_name
+
+	if accepted < requested_amount:
+		interaction_feedback.emit(
+			"%sを%d個拾った。バッグがいっぱい" % [display_name, accepted],
+			true
+		)
+	else:
+		interaction_feedback.emit(
+			"%sを%d個拾った" % [display_name, accepted],
+			true
+		)
+
+	_emit_inventory_changed()
+	return accepted
+
+
+func sell_all_ore() -> Dictionary:
+	var sold_count := inventory_count()
+	if sold_count <= 0:
+		interaction_feedback.emit("売る鉱石がありません", false)
+		return {
+			"sold": 0,
+			"value": 0,
+		}
+
+	var total_value := 0
+	for ore_id in ore_counts:
+		total_value += int(ore_counts[ore_id]) * int(ore_values.get(ore_id, 0))
+
+	ore_counts.clear()
+	ore_values.clear()
+	ore_names.clear()
+	money += total_value
+
+	interaction_feedback.emit(
+		"%d個売却　+¥%d" % [sold_count, total_value],
+		true
+	)
+	_emit_inventory_changed()
+
+	return {
+		"sold": sold_count,
+		"value": total_value,
+	}
+
+
+func inventory_count() -> int:
+	var total := 0
+	for value in ore_counts.values():
+		total += int(value)
+	return total
+
+
+func _emit_inventory_changed() -> void:
+	inventory_changed.emit(inventory_count(), inventory_capacity, money)
 
 
 func _toggle_cursor() -> void:
