@@ -1,12 +1,16 @@
 extends Node3D
 
 const UpgradeCatalogScript = preload("res://scripts/systems/upgrade_catalog.gd")
+const MachineCatalogScript = preload("res://scripts/systems/machine_catalog.gd")
+const SmallMinerScene = preload("res://scenes/world/small_miner.tscn")
+const PlacementPreviewScene = preload("res://scenes/world/placement_preview.tscn")
 
 @onready var player: CharacterBody3D = $Player
 @onready var feedback: Label = $HUD/Feedback
 @onready var inventory_label: Label = $HUD/Inventory
 @onready var money_label: Label = $HUD/Money
 @onready var control_state_label: Label = $HUD/ControlState
+@onready var build_state_label: Label = $HUD/BuildState
 
 @onready var upgrade_panel: PanelContainer = $HUD/UpgradePanel
 @onready var upgrade_balance: Label = $HUD/UpgradePanel/Margin/VBox/Balance
@@ -17,13 +21,23 @@ const UpgradeCatalogScript = preload("res://scripts/systems/upgrade_catalog.gd")
 @onready var capacity_button: Button = $HUD/UpgradePanel/Margin/VBox/CapacityRow/Top/Purchase
 @onready var move_info: Label = $HUD/UpgradePanel/Margin/VBox/MoveRow/Info
 @onready var move_button: Button = $HUD/UpgradePanel/Margin/VBox/MoveRow/Top/Purchase
+@onready var small_miner_info: Label = $HUD/UpgradePanel/Margin/VBox/MinerRow/Info
+@onready var small_miner_button: Button = $HUD/UpgradePanel/Margin/VBox/MinerRow/Top/Purchase
 
 var _feedback_token: int = 0
 var _upgrade_definitions: Dictionary = {}
+var _machine_definitions: Dictionary = {}
+
+var _placement_preview: Node3D = null
+var _placement_valid: bool = false
+var _pending_machine_cost: int = 0
+var _pending_machine_definition: Dictionary = {}
+var _placed_small_miners: int = 0
 
 
 func _ready() -> void:
 	_upgrade_definitions = UpgradeCatalogScript.load_all()
+	_machine_definitions = MachineCatalogScript.load_all()
 
 	if player.has_signal("mining_feedback"):
 		player.connect("mining_feedback", Callable(self, "_on_feedback"))
@@ -37,6 +51,16 @@ func _ready() -> void:
 		player.connect("upgrade_menu_changed", Callable(self, "_on_upgrade_menu_changed"))
 	if player.has_signal("upgrade_state_changed"):
 		player.connect("upgrade_state_changed", Callable(self, "_refresh_upgrade_panel"))
+	if player.has_signal("placement_confirm_requested"):
+		player.connect(
+			"placement_confirm_requested",
+			Callable(self, "_on_placement_confirm_requested")
+		)
+	if player.has_signal("placement_cancel_requested"):
+		player.connect(
+			"placement_cancel_requested",
+			Callable(self, "_on_placement_cancel_requested")
+		)
 
 	mining_button.pressed.connect(
 		Callable(self, "_purchase_upgrade").bind(&"mining_speed")
@@ -47,9 +71,13 @@ func _ready() -> void:
 	move_button.pressed.connect(
 		Callable(self, "_purchase_upgrade").bind(&"move_speed")
 	)
+	small_miner_button.pressed.connect(
+		Callable(self, "_purchase_small_miner")
+	)
 
 	feedback.visible = false
 	upgrade_panel.visible = false
+	build_state_label.visible = false
 
 	if player.has_method("inventory_count"):
 		_on_inventory_changed(
@@ -62,6 +90,11 @@ func _ready() -> void:
 
 	if player.has_method("refresh_control_state"):
 		player.call_deferred("refresh_control_state")
+
+
+func _process(_delta: float) -> void:
+	if _placement_preview != null:
+		_update_placement_preview()
 
 
 func _on_feedback(message: String, success: bool) -> void:
@@ -107,7 +140,7 @@ func _on_control_state_changed(message: String, active: bool) -> void:
 func _on_upgrade_menu_changed(is_open: bool) -> void:
 	upgrade_panel.visible = is_open
 	if is_open:
-		upgrade_status.text = "購入するアップグレードを選んでください"
+		upgrade_status.text = "購入するアップグレードや設備を選んでください"
 		upgrade_status.modulate = Color(0.74, 0.82, 0.9, 1.0)
 		_refresh_upgrade_panel()
 
@@ -126,6 +159,190 @@ func _purchase_upgrade(upgrade_id: StringName) -> void:
 		definition_variant as Dictionary
 	)
 	_refresh_upgrade_panel()
+
+
+func _purchase_small_miner() -> void:
+	var definition_variant: Variant = _machine_definitions.get("small_miner", {})
+	if not (definition_variant is Dictionary):
+		_on_feedback("採掘機データを読み込めません", false)
+		return
+
+	var definition: Dictionary = definition_variant as Dictionary
+	var max_placed: int = maxi(1, int(definition.get("max_placed", 1)))
+	if _placed_small_miners >= max_placed:
+		_on_feedback("小型採掘機はすでに設置済みです", false)
+		return
+
+	var cost: int = maxi(0, int(definition.get("cost", 0)))
+	var display_name: String = String(definition.get("name", "小型採掘機"))
+	var paid: bool = bool(
+		player.call("try_spend_money", cost, display_name)
+	)
+	if not paid:
+		_refresh_upgrade_panel()
+		return
+
+	_pending_machine_cost = cost
+	_pending_machine_definition = definition.duplicate(true)
+	player.call("close_upgrade_menu")
+	call_deferred("_start_small_miner_placement")
+
+
+func _start_small_miner_placement() -> void:
+	if _pending_machine_definition.is_empty():
+		return
+
+	if _placement_preview != null:
+		_placement_preview.queue_free()
+
+	_placement_preview = PlacementPreviewScene.instantiate() as Node3D
+	add_child(_placement_preview)
+	player.call("set_placement_mode", true)
+	build_state_label.visible = true
+	_update_placement_preview()
+
+
+func _update_placement_preview() -> void:
+	if _placement_preview == null:
+		return
+
+	var forward: Vector3 = -player.global_transform.basis.z
+	forward.y = 0.0
+	if forward.length_squared() < 0.001:
+		forward = Vector3.FORWARD
+	else:
+		forward = forward.normalized()
+
+	var target_position: Vector3 = player.global_position + forward * 3.0
+	target_position.x = snappedf(target_position.x, 0.5)
+	target_position.y = 0.0
+	target_position.z = snappedf(target_position.z, 0.5)
+
+	_placement_preview.global_position = target_position
+	_placement_valid = _can_place_small_miner(target_position)
+	_placement_preview.call("set_valid", _placement_valid)
+
+	build_state_label.text = (
+		"小型採掘機を配置中　左クリック: 設置　Esc: キャンセル\n"
+		+ ("設置できます" if _placement_valid else "ここには設置できません")
+	)
+
+
+func _can_place_small_miner(target_position: Vector3) -> bool:
+	if absf(target_position.x) > 10.5 or absf(target_position.z) > 10.5:
+		return false
+
+	var flat_player_position := Vector3(
+		player.global_position.x,
+		0.0,
+		player.global_position.z
+	)
+	var flat_target := Vector3(target_position.x, 0.0, target_position.z)
+	if flat_player_position.distance_to(flat_target) < 2.0:
+		return false
+
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(1.7, 1.5, 1.7)
+
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = shape
+	query.transform = Transform3D(
+		Basis.IDENTITY,
+		target_position + Vector3(0.0, 0.75, 0.0)
+	)
+	query.collision_mask = 1
+	query.collide_with_bodies = true
+	query.collide_with_areas = true
+
+	var hits: Array[Dictionary] = get_world_3d().direct_space_state.intersect_shape(
+		query,
+		16
+	)
+	for hit in hits:
+		var collider: Object = hit.get("collider")
+		if collider == null or collider == player:
+			continue
+		if collider is Node and (collider as Node).name == "Ground":
+			continue
+		return false
+
+	return true
+
+
+func _on_placement_confirm_requested() -> void:
+	if _placement_preview == null:
+		return
+
+	if not _placement_valid:
+		_on_feedback("ここには小型採掘機を設置できません", false)
+		return
+
+	var miner := SmallMinerScene.instantiate() as StaticBody3D
+	if miner == null:
+		_on_feedback("小型採掘機を生成できません", false)
+		return
+
+	var definition: Dictionary = _pending_machine_definition
+	miner.set(
+		"generation_interval",
+		float(definition.get("generation_interval", 2.0))
+	)
+	miner.set(
+		"storage_capacity",
+		maxi(1, int(definition.get("storage_capacity", 5)))
+	)
+
+	var ore_variant: Variant = definition.get("ore", {})
+	if ore_variant is Dictionary:
+		var ore: Dictionary = ore_variant as Dictionary
+		miner.set("ore_id", StringName(String(ore.get("id", "iron_ore"))))
+		miner.set("ore_name", String(ore.get("name", "鉄鉱石")))
+		miner.set(
+			"ore_sell_value",
+			maxi(0, int(ore.get("sell_value", 5)))
+		)
+
+	miner.position = _placement_preview.position
+	add_child(miner)
+	_placed_small_miners += 1
+
+	_finish_machine_placement(false)
+	_on_feedback(
+		"小型採掘機を設置した。鉱石がたまったらEで回収できます",
+		true
+	)
+	_refresh_upgrade_panel()
+
+
+func _on_placement_cancel_requested() -> void:
+	if _placement_preview == null:
+		return
+
+	_finish_machine_placement(true)
+	_on_feedback("設置をキャンセルしました。購入代金を返金しました", false)
+
+
+func _finish_machine_placement(refund: bool) -> void:
+	if refund and _pending_machine_cost > 0:
+		player.call("add_money", _pending_machine_cost)
+
+	if _placement_preview != null:
+		_placement_preview.queue_free()
+		_placement_preview = null
+
+	_pending_machine_cost = 0
+	_pending_machine_definition.clear()
+	_placement_valid = false
+	build_state_label.visible = false
+	player.call("set_placement_mode", false)
+
+
+func get_placed_small_miner_count() -> int:
+	return _placed_small_miners
+
+
+func is_machine_placement_active() -> bool:
+	return _placement_preview != null
 
 
 func _refresh_upgrade_panel() -> void:
@@ -150,6 +367,7 @@ func _refresh_upgrade_panel() -> void:
 		move_info,
 		move_button
 	)
+	_refresh_small_miner_row()
 
 
 func _refresh_upgrade_row(
@@ -179,6 +397,28 @@ func _refresh_upgrade_row(
 	else:
 		purchase_button.disabled = false
 		purchase_button.text = "購入 ¥%d" % cost
+
+
+func _refresh_small_miner_row() -> void:
+	var definition_variant: Variant = _machine_definitions.get("small_miner", {})
+	if not (definition_variant is Dictionary):
+		small_miner_info.text = "採掘機データを読み込めません"
+		small_miner_button.disabled = true
+		small_miner_button.text = "利用不可"
+		return
+
+	var definition: Dictionary = definition_variant as Dictionary
+	var description: String = String(definition.get("description", ""))
+	var cost: int = maxi(0, int(definition.get("cost", 0)))
+	var max_placed: int = maxi(1, int(definition.get("max_placed", 1)))
+
+	small_miner_info.text = description
+	if _placed_small_miners >= max_placed:
+		small_miner_button.disabled = true
+		small_miner_button.text = "設置済み"
+	else:
+		small_miner_button.disabled = false
+		small_miner_button.text = "購入して配置 ¥%d" % cost
 
 
 func _current_upgrade_value(upgrade_id: StringName) -> String:
