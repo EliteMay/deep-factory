@@ -6,6 +6,8 @@ signal inventory_changed(current_count: int, capacity: int, money: int)
 signal control_state_changed(message: String, active: bool)
 signal upgrade_menu_changed(is_open: bool)
 signal upgrade_state_changed()
+signal placement_confirm_requested()
+signal placement_cancel_requested()
 
 @export_category("Movement")
 @export var move_speed: float = 5.0
@@ -36,6 +38,7 @@ var money: int = 0
 var _wants_mouse_capture: bool = true
 var _suppress_mining_until_msec: int = 0
 var _upgrade_menu_open: bool = false
+var _placement_mode: bool = false
 
 
 func _ready() -> void:
@@ -61,6 +64,24 @@ func _notification(what: int) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if _placement_mode:
+		if event.is_action_pressed("toggle_cursor"):
+			placement_cancel_requested.emit()
+			get_viewport().set_input_as_handled()
+			return
+
+		if event.is_action_pressed("mine"):
+			placement_confirm_requested.emit()
+			get_viewport().set_input_as_handled()
+			return
+
+		if event is InputEventMouseMotion and _gameplay_input_active():
+			_apply_mouse_look(event)
+			get_viewport().set_input_as_handled()
+			return
+
+		return
+
 	if _upgrade_menu_open:
 		if event.is_action_pressed("toggle_cursor"):
 			close_upgrade_menu()
@@ -103,13 +124,17 @@ func _input(event: InputEvent) -> void:
 		return
 
 	if event is InputEventMouseMotion and _gameplay_input_active():
-		rotate_y(-event.relative.x * mouse_sensitivity)
-		camera_pivot.rotate_x(-event.relative.y * mouse_sensitivity)
-		camera_pivot.rotation.x = clamp(
-			camera_pivot.rotation.x,
-			deg_to_rad(-max_pitch_degrees),
-			deg_to_rad(max_pitch_degrees)
-		)
+		_apply_mouse_look(event)
+
+
+func _apply_mouse_look(event: InputEventMouseMotion) -> void:
+	rotate_y(-event.relative.x * mouse_sensitivity)
+	camera_pivot.rotate_x(-event.relative.y * mouse_sensitivity)
+	camera_pivot.rotation.x = clamp(
+		camera_pivot.rotation.x,
+		deg_to_rad(-max_pitch_degrees),
+		deg_to_rad(max_pitch_degrees)
+	)
 
 
 func _physics_process(delta: float) -> void:
@@ -187,7 +212,7 @@ func _gameplay_input_active() -> bool:
 
 
 func open_upgrade_menu() -> void:
-	if _upgrade_menu_open:
+	if _upgrade_menu_open or _placement_mode:
 		return
 
 	_upgrade_menu_open = true
@@ -210,6 +235,37 @@ func close_upgrade_menu() -> void:
 		if window:
 			window.grab_focus()
 		call_deferred("_capture_mouse")
+
+
+func set_placement_mode(active: bool) -> void:
+	_placement_mode = active
+	if active:
+		_wants_mouse_capture = true
+		if DisplayServer.get_name() != "headless":
+			call_deferred("_request_gameplay_focus")
+
+
+func is_placement_mode() -> bool:
+	return _placement_mode
+
+
+func try_spend_money(cost: int, item_name: String = "購入") -> bool:
+	var safe_cost: int = maxi(0, cost)
+	if money < safe_cost:
+		interaction_feedback.emit(
+			"%sには所持金が足りません　必要 ¥%d" % [item_name, safe_cost],
+			false
+		)
+		return false
+
+	money -= safe_cost
+	_emit_inventory_changed()
+	return true
+
+
+func add_money(amount: int) -> void:
+	money += maxi(0, amount)
+	_emit_inventory_changed()
 
 
 func get_upgrade_level(upgrade_id: StringName) -> int:
