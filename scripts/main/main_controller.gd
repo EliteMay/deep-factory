@@ -1,5 +1,7 @@
 extends Node3D
 
+const UpgradeCatalogScript = preload("res://scripts/systems/upgrade_catalog.gd")
+
 @onready var player: CharacterBody3D = $Player
 @onready var feedback: Label = $HUD/Feedback
 @onready var inventory_label: Label = $HUD/Inventory
@@ -21,7 +23,7 @@ var _upgrade_definitions: Dictionary = {}
 
 
 func _ready() -> void:
-	_upgrade_definitions = UpgradeCatalog.load_all()
+	_upgrade_definitions = UpgradeCatalogScript.load_all()
 
 	if player.has_signal("mining_feedback"):
 		player.connect("mining_feedback", Callable(self, "_on_feedback"))
