@@ -63,7 +63,7 @@ func _input(event: InputEvent) -> void:
 		event is InputEventMouseButton
 		and event.button_index == MOUSE_BUTTON_LEFT
 		and event.pressed
-		and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED
+		and not _gameplay_input_active()
 	):
 		_wants_mouse_capture = true
 		_suppress_mining_until_msec = Time.get_ticks_msec() + 200
@@ -286,7 +286,7 @@ func _emit_inventory_changed() -> void:
 
 
 func _toggle_cursor() -> void:
-	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+	if _wants_mouse_capture:
 		_wants_mouse_capture = false
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		control_state_changed.emit("カーソル表示中。ゲーム画面をクリックで操作へ戻る", false)
