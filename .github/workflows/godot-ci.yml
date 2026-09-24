@@ -51,3 +51,10 @@ jobs:
           set -o pipefail
           timeout 20s ./Godot_v4.7.2-stable_linux.x86_64 --headless --path . --scene res://tests/input_smoke.tscn 2>&1 | tee input-smoke.log
           grep -q "INPUT_SMOKE: PASS" input-smoke.log
+
+      - name: Run upgrade smoke test
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 20s ./Godot_v4.7.2-stable_linux.x86_64 --headless --path . --scene res://tests/upgrade_smoke.tscn 2>&1 | tee upgrade-smoke.log
+          grep -q "UPGRADE_SMOKE: PASS" upgrade-smoke.log
