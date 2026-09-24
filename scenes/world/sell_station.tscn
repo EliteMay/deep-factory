@@ -1,0 +1,35 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/sell_station.gd" id="1_sell"]
+
+[sub_resource type="StandardMaterial3D" id="Material_sell"]
+albedo_color = Color(0.08, 0.42, 0.44, 1)
+emission_enabled = true
+emission = Color(0.02, 0.16, 0.17, 1)
+metallic = 0.25
+roughness = 0.42
+
+[sub_resource type="BoxMesh" id="BoxMesh_sell"]
+material = SubResource("Material_sell")
+size = Vector3(1.8, 1.2, 1.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape_sell"]
+size = Vector3(1.8, 1.2, 1.2)
+
+[node name="SellStation" type="StaticBody3D"]
+script = ExtResource("1_sell")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.6, 0)
+mesh = SubResource("BoxMesh_sell")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.6, 0)
+shape = SubResource("BoxShape_sell")
+
+[node name="Label3D" type="Label3D" parent="."]
+position = Vector3(0, 1.45, 0)
+text = "SELL"
+font_size = 48
+outline_size = 8
+billboard = 1
