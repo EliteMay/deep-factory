@@ -28,12 +28,22 @@ jobs:
       - name: Import project
         shell: bash
         run: |
-          ./Godot_v4.7.2-stable_linux.x86_64 --headless --path . --import
+          set -o pipefail
+          ./Godot_v4.7.2-stable_linux.x86_64 --headless --path . --import 2>&1 | tee import.log
+          if grep -Eq "SCRIPT ERROR|(^|[[:space:]])ERROR:" import.log; then
+            echo "Godot import log contains an error."
+            exit 1
+          fi
 
       - name: Load main scene
         shell: bash
         run: |
-          ./Godot_v4.7.2-stable_linux.x86_64 --headless --path . --quit-after 3
+          set -o pipefail
+          ./Godot_v4.7.2-stable_linux.x86_64 --headless --path . --quit-after 3 2>&1 | tee main-scene.log
+          if grep -Eq "SCRIPT ERROR|(^|[[:space:]])ERROR:" main-scene.log; then
+            echo "Main scene log contains an error."
+            exit 1
+          fi
 
       - name: Run gameplay input smoke test
         shell: bash
