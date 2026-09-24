@@ -99,7 +99,7 @@ func _try_mine() -> void:
 		return
 
 	var result: Variant = collider.call("mine", mining_damage)
-	if not result is Dictionary:
+	if not (result is Dictionary):
 		mining_feedback.emit("採掘成功", true)
 		return
 
