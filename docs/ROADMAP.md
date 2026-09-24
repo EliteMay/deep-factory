@@ -241,8 +241,12 @@ Phase 2のWindows実機確認もRepository commit `53e2c234` / Godot `4.7.2.stab
 - 岩を3回採掘すると破壊される
 - 茶色い鉱石がWorldへDropする
 
-Phase 3の回収・売却実装はRepository側で追加済み。2026-09-24に「ゲーム画面へカーソルを合わせても操作できない」入力Regression報告があり、最初の `_unhandled_input()` → `_input()` 修正だけでは実機で復旧しなかった。
+Phase 3の回収・売却実装はRepository側で追加済み。2026-09-24に「ゲーム画面へカーソルを合わせても操作できない」入力Regressionが発生した。
 
-追加対策として、Game WindowのFocusとMouse CaptureをPlayer側で明示管理するよう変更した。起動時に `Window.grab_focus()` を要求し、Focus復帰時にMouse Captureを再適用、Focusを失った時はCursorを表示する。操作可能でない時はHUDへ「ゲーム画面をクリックして操作開始」と表示する。HUD LabelはMouse Inputを遮らないよう `mouse_filter = IGNORE` にした。
+確定したRoot Causeは `player_controller.gd` のInventory追加部分で、Variantから型推論する `:= max(...)` がGodot 4.7.2のWarning-as-errorに該当し、Player Script全体がParse Errorで読み込まれていなかったこと。これによりWASD・Mouse Look・採掘・E操作・Esc切替がすべて停止した。該当箇所は型付きの `maxi()/mini()` へ修正した。
 
-またGodot 4.7.2 CIへGameplay Input Smoke Testを追加し、Input Action存在・WASD移動・EscでCapture解除Intent・左クリックでCapture再要求Intentを自動確認する。実際のWindows Window FocusとMouse Capture復旧はUser実機確認が終わるまでPhase 3完了とは扱わない。
+最初の `_unhandled_input()` → `_input()` 変更だけではRoot Causeへ届いていなかったため、追加でWindow FocusとMouse Captureも明示管理するようHardeningした。起動時に `Window.grab_focus()` を要求し、Focus復帰時にMouse Captureを再適用、Focusを失った時はCursorを表示する。操作可能でない時はHUDへ「ゲーム画面をクリックして操作開始」と表示し、HUD LabelはMouse Inputを遮らないよう `mouse_filter = IGNORE` にした。
+
+再発防止としてGodot 4.7.2 CIへGameplay Input Smoke Testを追加し、Input Action存在・WASD移動・EscでCapture解除Intent・左クリックでCapture再要求Intentを確認する。またGodotがScript Errorを出してもProcess exit code 0になる場合があるため、Import/Main Scene logの `SCRIPT ERROR` / `ERROR:` もCIで明示検出して失敗させる。
+
+実際のWindows Window FocusとMouse Capture復旧はUser実機確認が終わるまでPhase 3完了とは扱わない。
