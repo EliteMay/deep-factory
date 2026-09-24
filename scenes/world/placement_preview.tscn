@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/placement_preview.gd" id="1_preview"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_preview"]
+size = Vector3(1.6, 1.45, 1.6)
+
+[node name="PlacementPreview" type="Node3D"]
+script = ExtResource("1_preview")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.725, 0)
+mesh = SubResource("BoxMesh_preview")
+
+[node name="StatusLabel" type="Label3D" parent="."]
+position = Vector3(0, 1.9, 0)
+text = "ここには置けない"
+font_size = 30
+outline_size = 7
+billboard = 1
+horizontal_alignment = 1

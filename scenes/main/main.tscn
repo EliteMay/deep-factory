@@ -257,6 +257,24 @@ text = "ゲーム画面をクリックして操作開始"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="BuildState" type="Label" parent="HUD"]
+visible = false
+mouse_filter = 2
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -360.0
+offset_top = -94.0
+offset_right = 360.0
+offset_bottom = -28.0
+theme_override_colors/font_color = Color(0.67, 0.94, 1, 1)
+theme_override_font_sizes/font_size = 17
+text = "小型採掘機を配置中"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="UpgradePanel" type="PanelContainer" parent="HUD"]
 visible = false
 anchors_preset = 8
@@ -264,10 +282,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -340.0
-offset_top = -230.0
-offset_right = 340.0
-offset_bottom = 230.0
+offset_left = -360.0
+offset_top = -300.0
+offset_right = 360.0
+offset_bottom = 300.0
 theme_override_styles/panel = SubResource("Style_upgrade_panel")
 
 [node name="Margin" type="MarginContainer" parent="HUD/UpgradePanel"]
@@ -365,9 +383,39 @@ text = "購入 ¥10"
 theme_override_colors/font_color = Color(0.62, 0.7, 0.78, 1)
 text = "移動速度を5.0から6.5へ上げる"
 
+[node name="MachineSeparator" type="HSeparator" parent="HUD/UpgradePanel/Margin/VBox"]
+
+[node name="MachineTitle" type="Label" parent="HUD/UpgradePanel/Margin/VBox"]
+theme_override_colors/font_color = Color(0.68, 0.88, 1, 1)
+theme_override_font_sizes/font_size = 18
+text = "自動化設備"
+
+[node name="MinerRow" type="VBoxContainer" parent="HUD/UpgradePanel/Margin/VBox"]
+theme_override_constants/separation = 4
+
+[node name="Top" type="HBoxContainer" parent="HUD/UpgradePanel/Margin/VBox/MinerRow"]
+theme_override_constants/separation = 12
+
+[node name="Name" type="Label" parent="HUD/UpgradePanel/Margin/VBox/MinerRow/Top"]
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "小型採掘機"
+
+[node name="Purchase" type="Button" parent="HUD/UpgradePanel/Margin/VBox/MinerRow/Top"]
+custom_minimum_size = Vector2(170, 36)
+theme_override_styles/normal = SubResource("Style_upgrade_button")
+theme_override_styles/hover = SubResource("Style_upgrade_button_hover")
+theme_override_styles/pressed = SubResource("Style_upgrade_button_hover")
+theme_override_styles/disabled = SubResource("Style_upgrade_button_disabled")
+text = "購入して配置 ¥15"
+
+[node name="Info" type="Label" parent="HUD/UpgradePanel/Margin/VBox/MinerRow"]
+theme_override_colors/font_color = Color(0.62, 0.7, 0.78, 1)
+text = "2秒ごとに鉄鉱石を1個生成し、内部に最大5個まで保管する"
+
 [node name="Status" type="Label" parent="HUD/UpgradePanel/Margin/VBox"]
 theme_override_colors/font_color = Color(0.74, 0.82, 0.9, 1)
-text = "購入するアップグレードを選んでください"
+text = "購入するアップグレードや設備を選んでください"
 
 [node name="CloseHint" type="Label" parent="HUD/UpgradePanel/Margin/VBox"]
 theme_override_colors/font_color = Color(0.48, 0.56, 0.64, 1)

@@ -1,0 +1,15 @@
+{
+  "small_miner": {
+    "name": "小型採掘機",
+    "description": "2秒ごとに鉄鉱石を1個生成し、内部に最大5個まで保管する",
+    "cost": 15,
+    "max_placed": 1,
+    "generation_interval": 2.0,
+    "storage_capacity": 5,
+    "ore": {
+      "id": "iron_ore",
+      "name": "鉄鉱石",
+      "sell_value": 5
+    }
+  }
+}
