@@ -21,16 +21,33 @@ jobs:
       - name: Download Godot 4.7.2
         shell: bash
         run: |
-          curl --fail --location --retry 3             --output godot.zip             https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          curl --fail --location --retry 3 --output godot.zip https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
           unzip -q godot.zip
           chmod +x Godot_v4.7.2-stable_linux.x86_64
 
       - name: Import project
         shell: bash
         run: |
-          ./Godot_v4.7.2-stable_linux.x86_64             --headless             --path .             --import
+          set -o pipefail
+          ./Godot_v4.7.2-stable_linux.x86_64 --headless --path . --import 2>&1 | tee import.log
+          if grep -Eq "SCRIPT ERROR|(^|[[:space:]])ERROR:" import.log; then
+            echo "Godot import log contains an error."
+            exit 1
+          fi
 
       - name: Load main scene
         shell: bash
         run: |
-          ./Godot_v4.7.2-stable_linux.x86_64             --headless             --path .             --quit-after 3
+          set -o pipefail
+          ./Godot_v4.7.2-stable_linux.x86_64 --headless --path . --quit-after 3 2>&1 | tee main-scene.log
+          if grep -Eq "SCRIPT ERROR|(^|[[:space:]])ERROR:" main-scene.log; then
+            echo "Main scene log contains an error."
+            exit 1
+          fi
+
+      - name: Run gameplay input smoke test
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 20s ./Godot_v4.7.2-stable_linux.x86_64 --headless --path . --scene res://tests/input_smoke.tscn 2>&1 | tee input-smoke.log
+          grep -q "INPUT_SMOKE: PASS" input-smoke.log
