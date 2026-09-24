@@ -217,8 +217,8 @@ func add_ore(
 	sell_value: int,
 	requested_amount: int
 ) -> int:
-	var available := max(0, inventory_capacity - inventory_count())
-	var accepted := int(min(max(requested_amount, 0), available))
+	var available: int = maxi(0, inventory_capacity - inventory_count())
+	var accepted: int = mini(maxi(requested_amount, 0), available)
 
 	if accepted <= 0:
 		interaction_feedback.emit("バッグがいっぱい", false)
