@@ -169,10 +169,23 @@ func _refresh_upgrade_row(
 	var cost: int = int(definition.get("cost", 0))
 	var description: String = String(definition.get("description", ""))
 
-	info_label.text = description
+	var current_value: String = _current_upgrade_value(upgrade_id)
+	info_label.text = description + "　現在: " + current_value
 	if level >= max_level:
 		purchase_button.disabled = true
 		purchase_button.text = "購入済み"
 	else:
 		purchase_button.disabled = false
 		purchase_button.text = "購入 ¥%d" % cost
+
+
+func _current_upgrade_value(upgrade_id: StringName) -> String:
+	match String(upgrade_id):
+		"mining_speed":
+			return "%.2f秒" % float(player.get("mining_cooldown"))
+		"inventory_capacity":
+			return "%d" % int(player.get("inventory_capacity"))
+		"move_speed":
+			return "%.1f" % float(player.get("move_speed"))
+		_:
+			return "-"
