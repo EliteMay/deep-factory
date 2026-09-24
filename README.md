@@ -6,7 +6,7 @@
 
 ## 現在の段階
 
-現在は **Prototype 0.1の初期実装段階** です。Phase 1の一人称3D操作、Phase 2の採掘、Phase 3の回収・売却ループはWindows実機確認まで完了しました。Phase 4ではUPGRADES端末、採掘速度・所持容量・移動速度の3種類、価格/効果Data、購入Panelまで実装し、Windows実機でProgression Loopを確認する段階です。
+現在は **Prototype 0.1の初期実装段階** です。Phase 1の一人称3D操作、Phase 2の採掘、Phase 3の回収・売却、Phase 4のアップグレードはWindows実機確認まで完了しました。Phase 5では最初の自動化として小型採掘機の購入・配置・自動生成・内部ストレージ・回収まで実装し、Windows実機でAutomation Loopを確認する段階です。
 
 最初の目標は、以下を満たす **Prototype 0.1 / MVP** の完成です。
 
@@ -75,6 +75,7 @@
 - `docs/SAVE_FORMAT.md` — セーブデータ方針
 - `docs/PROJECT_STRUCTURE.md` — プロジェクト構成
 - `docs/UPGRADE_UI.md` — Phase 4の端末UI調査・Interaction仕様
+- `docs/AUTOMATION_01.md` — Phase 5の小型採掘機・配置・回収仕様
 
 ## 開発開始
 
@@ -95,7 +96,7 @@ Game Dev HubはDeep Factory固有の仕様を持たず、このRepositoryをSour
 5. プロジェクトを開く
 6. 右上の実行ボタンで現在のテストシーンを起動する
 
-現在のテストシーンでは、WASD移動・マウス視点操作・衝突・Escによるカーソル切替に加え、5個の岩を左クリックで採掘できます。岩は3回で壊れて鉄鉱石がDropし、Eで拾えます。右側のSELL端末へEで売却し、左側のUPGRADES端末へEで入ると、採掘速度・所持容量・移動速度を購入できます。価格・効果・現在値・購入済み状態は端末Panelで確認できます。
+現在のテストシーンでは、WASD移動・マウス視点操作・衝突・Escによるカーソル切替に加え、5個の岩を左クリックで採掘できます。岩は3回で壊れて鉄鉱石がDropし、Eで拾えます。右側のSELL端末へEで売却し、左側のUPGRADES端末では3種類のPlayer Upgradeに加えて小型採掘機を15円で購入できます。採掘機購入後は配置Previewへ切り替わり、設置可能場所へ左クリックで設置します。設置後は2秒ごとに鉄鉱石を内部へ生成し、最大5個まで保管します。採掘機へEで回収するとPlayer Inventoryへ移ります。
 
 ## Windowsビルド
 
