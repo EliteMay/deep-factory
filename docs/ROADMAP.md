@@ -223,15 +223,52 @@
 
 ## Phase 6 — Save / Load
 
-- [ ] セーブモデル
+状態: **実装中 / セーブモデル完了**
+
+- [x] セーブモデル
+  - 担当: ChatGPT
+  - `scripts/systems/save_model.gd` にMVPの保存対象とJSON互換のSnapshot形式を定義する
+  - 所持金、Inventory、Upgrade Level、Player位置、設置済みMachine、Machine内部StorageをSnapshotへまとめる
+  - 静的な名称・価格・効果値はセーブへ重複保存せず、Repositoryの `data/*.json` を正本として扱う
+  - `MainController.build_save_snapshot()` から現在のRuntime Stateを1つのDictionaryとして取得できるようにする
+  - Save Model Smoke Testで必須項目とMachine状態がSnapshotへ入ることを確認する
 - [ ] セーブバージョン
+  - 担当: ChatGPT
+  - MVPの正式Versionを `save_version = 1` として固定する
+  - 現在Version、古いVersion、未知の新しいVersionを区別するCompatibility判定を実装する
+  - 古いVersionはMigration入口へ渡し、未知の新しいVersionは既存データを壊さず安全に拒否する
+  - Version判定のSmoke Testを追加する
 - [ ] 自動保存
+  - 担当: ChatGPT
+  - SnapshotをJSON化して `user://save.json` へ保存するSave Storeを追加する
+  - 主要な進行変更後とゲーム終了時に保存要求を出せる構造にする
+  - 保存途中で既存セーブを直接壊さないよう一時File経由の置換を使う
+  - Headless Testでは一時保存先を使い、Repositoryへ実セーブを作らない
 - [ ] 手動保存の要否判断
+  - 担当: ChatGPT
+  - Prototype 0.1で手動保存Buttonが必要か、Auto Saveのみで十分かを実装状況とUXから決定する
+  - 採用しない場合も理由を `docs/SAVE_FORMAT.md` へ記録する
+  - 手動保存を採用する場合は既存操作を邪魔しない最小UIにする
 - [ ] ロード
+  - 担当: ChatGPT
+  - 起動時に `user://save.json` を読み込み、所持金・Inventory・Upgrade・Player位置を復元する
+  - 設置済み小型採掘機を再生成し、位置と内部Storageを復元する
+  - Load後にHUD、Upgrade効果、Machine設置上限がRuntime Stateと一致するよう再計算する
+  - 「保存 → Runtime変更 → Load」で元の状態へ戻るSmoke Testを追加する
 - [ ] 破損時の最低限の保護
+  - 担当: ChatGPT
+  - JSON Parse失敗、必須Field欠落、未知の新VersionでCrashしない
+  - 読み込み失敗時は破損Fileを上書きせず、新規Gameとして安全に起動できる
+  - 直前の正常データを復旧できる最低限のBackup方針を入れる
+- [ ] Windows実機でセーブ・ロード確認
+  - 担当: あなた
+  - 所持金・鉱石・Upgrade・小型採掘機がある状態まで進めてゲームを終了する
+  - Game Dev Hubからゲームをもう一度起動し、Player位置と主要進行が復元されることを確認する
+  - 小型採掘機の設置位置と内部Storage数が再起動前と一致することを確認する
+  - 復元後も採掘・回収・売却・Upgrade・自動生成が通常通り続けられることを確認する
 
 完了条件:
-ゲーム再起動後に主要進行状況が復元される。
+ゲーム再起動後に主要進行状況が復元され、破損または非対応セーブでもゲームが安全に起動できる。
 
 ## Phase 7 — Prototype 0.1 Validation
 
@@ -375,3 +412,8 @@ Game Dev Hub共有パックでRepository commit `a14b80a6` / Godot `4.7.2.stable
 
 このEvidenceによりPhase 5を完了とする。次はPhase 6 — Save / Loadへ進む。
 
+### 2026-09-24 Phase 6 セーブモデル
+
+Phase 6開始時点でRoadmapの各Taskに具体手順が無く、Game Dev Hubが汎用の「詳細手順がRoadmapにまだ書かれていません」を表示していたため、Phase 6の全Taskを実装可能な粒度へ具体化した。
+
+最初の「セーブモデル」ではMVPの正式Snapshot形をコードと文書へ定義し、Runtimeから所持金・Inventory・Upgrade・Player位置・設置済みMachine・Machine内部Storageを取得できるようにした。Diskへの書き込みやLoad処理は後続Taskで追加する。

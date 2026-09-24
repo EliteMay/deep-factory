@@ -2,6 +2,7 @@ extends Node3D
 
 const UpgradeCatalogScript = preload("res://scripts/systems/upgrade_catalog.gd")
 const MachineCatalogScript = preload("res://scripts/systems/machine_catalog.gd")
+const SaveModelScript = preload("res://scripts/systems/save_model.gd")
 const SmallMinerScene = preload("res://scenes/world/small_miner.tscn")
 const PlacementPreviewScene = preload("res://scenes/world/placement_preview.tscn")
 
@@ -335,6 +336,15 @@ func _finish_machine_placement(refund: bool) -> void:
 	_placement_valid = false
 	build_state_label.visible = false
 	player.call("set_placement_mode", false)
+
+
+func build_save_snapshot() -> Dictionary:
+	var machine_nodes: Array[Node] = []
+	for node in get_tree().get_nodes_in_group("small_miners"):
+		if node is Node and is_ancestor_of(node):
+			machine_nodes.append(node as Node)
+
+	return SaveModelScript.build_snapshot(player, machine_nodes)
 
 
 func get_placed_small_miner_count() -> int:

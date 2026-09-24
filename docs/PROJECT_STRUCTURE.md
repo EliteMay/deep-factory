@@ -28,6 +28,7 @@ deep-factory/
 │  ├─ resources/
 │  ├─ world/
 │  └─ systems/
+│     └─ save_model.gd
 │
 ├─ data/
 │  ├─ upgrades.json
@@ -37,7 +38,8 @@ deep-factory/
 │  ├─ input_smoke.*
 │  ├─ core_loop_smoke.*
 │  ├─ upgrade_smoke.*
-│  └─ automation_smoke.*
+│  ├─ automation_smoke.*
+│  └─ save_model_smoke.*
 │
 └─ docs/
    ├─ GAME_DESIGN.md
@@ -82,6 +84,7 @@ Machine Typeが増えた時点で、共通Machine責務を `scripts/machines/` �
 - Mining / Pickup / Sell
 - Upgrade
 - First Automation
+- Save Model Snapshot
 
 Game Dev HubはEditorを介さず起動するため、CIではImport前のDirect Cold Startも継続する。
 

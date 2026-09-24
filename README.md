@@ -6,7 +6,7 @@
 
 ## 現在の段階
 
-現在は **Prototype 0.1の初期実装段階** です。Phase 1の一人称3D操作、Phase 2の採掘、Phase 3の回収・売却、Phase 4のアップグレード、Phase 5の最初の自動化までWindows実機確認が完了しました。次はPhase 6でセーブ・ロードを実装し、ゲーム再起動後も主要な進行状況を復元できる状態を目指します。
+現在は **Prototype 0.1の初期実装段階** です。Phase 1の一人称3D操作、Phase 2の採掘、Phase 3の回収・売却、Phase 4のアップグレード、Phase 5の最初の自動化までWindows実機確認が完了しました。Phase 6ではセーブ・ロードを進めており、MVPのセーブモデルとRuntime Snapshotを実装済みです。次はセーブVersion互換性の判定を追加します。
 
 最初の目標は、以下を満たす **Prototype 0.1 / MVP** の完成です。
 
