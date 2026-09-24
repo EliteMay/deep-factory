@@ -1,9 +1,10 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="1_player"]
 [ext_resource type="Script" path="res://scripts/main/main_controller.gd" id="2_main"]
 [ext_resource type="PackedScene" path="res://scenes/resources/mineable_rock.tscn" id="3_rock"]
 [ext_resource type="PackedScene" path="res://scenes/world/sell_station.tscn" id="4_sell"]
+[ext_resource type="PackedScene" path="res://scenes/world/upgrade_station.tscn" id="5_upgrade"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -36,6 +37,54 @@ size = Vector3(2, 2, 2)
 albedo_color = Color(0.12, 0.2, 0.23, 1)
 metallic = 0.35
 roughness = 0.58
+
+[sub_resource type="StyleBoxFlat" id="Style_upgrade_panel"]
+bg_color = Color(0.025, 0.04, 0.065, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.48, 0.7, 0.85)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="Style_upgrade_button"]
+bg_color = Color(0.08, 0.22, 0.34, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.25, 0.62, 0.82, 0.8)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="Style_upgrade_button_hover"]
+bg_color = Color(0.11, 0.31, 0.46, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.36, 0.76, 0.96, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="Style_upgrade_button_disabled"]
+bg_color = Color(0.08, 0.1, 0.13, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.24, 0.28, 0.32, 0.8)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
 
 [node name="Main" type="Node3D"]
 script = ExtResource("2_main")
@@ -92,11 +141,26 @@ mesh = SubResource("BoxMesh_block")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="TestBlockC"]
 shape = SubResource("BoxShape_block")
 
-[node name="MiningRock" parent="." instance=ExtResource("3_rock")]
+[node name="MiningRockA" parent="." instance=ExtResource("3_rock")]
 position = Vector3(0, 0, 0)
 
+[node name="MiningRockB" parent="." instance=ExtResource("3_rock")]
+position = Vector3(-5, 0, 0.5)
+
+[node name="MiningRockC" parent="." instance=ExtResource("3_rock")]
+position = Vector3(5, 0, 0.5)
+
+[node name="MiningRockD" parent="." instance=ExtResource("3_rock")]
+position = Vector3(-5, 0, -5.5)
+
+[node name="MiningRockE" parent="." instance=ExtResource("3_rock")]
+position = Vector3(5, 0, -5.5)
+
 [node name="SellStation" parent="." instance=ExtResource("4_sell")]
-position = Vector3(4.2, 0, 3.0)
+position = Vector3(4.2, 0, 3)
+
+[node name="UpgradeStation" parent="." instance=ExtResource("5_upgrade")]
+position = Vector3(-4.2, 0, 3)
 
 [node name="Player" parent="." instance=ExtResource("1_player")]
 position = Vector3(0, 0.05, 5)
@@ -128,12 +192,12 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -210.0
+offset_left = -250.0
 offset_top = 42.0
-offset_right = 210.0
+offset_right = 250.0
 offset_bottom = 72.0
 theme_override_font_sizes/font_size = 16
-text = "採掘フィードバック"
+text = "フィードバック"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -169,11 +233,11 @@ horizontal_alignment = 2
 mouse_filter = 2
 offset_left = 18.0
 offset_top = 18.0
-offset_right = 700.0
+offset_right = 760.0
 offset_bottom = 54.0
 theme_override_colors/font_color = Color(0.72, 0.8, 0.87, 0.92)
 theme_override_font_sizes/font_size = 16
-text = "WASD: 移動　マウス: 視点　左クリック: 採掘　E: 拾う/売る　Esc: カーソル切替"
+text = "WASD: 移動　マウス: 視点　左クリック: 採掘　E: 拾う/売る/端末　Esc: 戻る"
 
 [node name="ControlState" type="Label" parent="HUD"]
 visible = false
@@ -192,3 +256,120 @@ theme_override_font_sizes/font_size = 18
 text = "ゲーム画面をクリックして操作開始"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="UpgradePanel" type="PanelContainer" parent="HUD"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -340.0
+offset_top = -230.0
+offset_right = 340.0
+offset_bottom = 230.0
+theme_override_styles/panel = SubResource("Style_upgrade_panel")
+
+[node name="Margin" type="MarginContainer" parent="HUD/UpgradePanel"]
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 22
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="HUD/UpgradePanel/Margin"]
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="HUD/UpgradePanel/Margin/VBox"]
+theme_override_colors/font_color = Color(0.82, 0.92, 1, 1)
+theme_override_font_sizes/font_size = 26
+text = "アップグレード端末"
+
+[node name="Subtitle" type="Label" parent="HUD/UpgradePanel/Margin/VBox"]
+theme_override_colors/font_color = Color(0.6, 0.7, 0.78, 1)
+theme_override_font_sizes/font_size = 14
+text = "売却したお金で、手作業を少しずつ効率化する"
+
+[node name="Balance" type="Label" parent="HUD/UpgradePanel/Margin/VBox"]
+theme_override_colors/font_color = Color(0.55, 1, 0.72, 1)
+theme_override_font_sizes/font_size = 18
+text = "所持金: ¥0"
+
+[node name="Separator" type="HSeparator" parent="HUD/UpgradePanel/Margin/VBox"]
+
+[node name="MiningRow" type="VBoxContainer" parent="HUD/UpgradePanel/Margin/VBox"]
+theme_override_constants/separation = 4
+
+[node name="Top" type="HBoxContainer" parent="HUD/UpgradePanel/Margin/VBox/MiningRow"]
+theme_override_constants/separation = 12
+
+[node name="Name" type="Label" parent="HUD/UpgradePanel/Margin/VBox/MiningRow/Top"]
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "採掘速度"
+
+[node name="Purchase" type="Button" parent="HUD/UpgradePanel/Margin/VBox/MiningRow/Top"]
+custom_minimum_size = Vector2(130, 36)
+theme_override_styles/normal = SubResource("Style_upgrade_button")
+theme_override_styles/hover = SubResource("Style_upgrade_button_hover")
+theme_override_styles/pressed = SubResource("Style_upgrade_button_hover")
+theme_override_styles/disabled = SubResource("Style_upgrade_button_disabled")
+text = "購入 ¥5"
+
+[node name="Info" type="Label" parent="HUD/UpgradePanel/Margin/VBox/MiningRow"]
+theme_override_colors/font_color = Color(0.62, 0.7, 0.78, 1)
+text = "採掘間隔を0.45秒から0.25秒へ短縮する"
+
+[node name="CapacityRow" type="VBoxContainer" parent="HUD/UpgradePanel/Margin/VBox"]
+theme_override_constants/separation = 4
+
+[node name="Top" type="HBoxContainer" parent="HUD/UpgradePanel/Margin/VBox/CapacityRow"]
+theme_override_constants/separation = 12
+
+[node name="Name" type="Label" parent="HUD/UpgradePanel/Margin/VBox/CapacityRow/Top"]
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "所持容量"
+
+[node name="Purchase" type="Button" parent="HUD/UpgradePanel/Margin/VBox/CapacityRow/Top"]
+custom_minimum_size = Vector2(130, 36)
+theme_override_styles/normal = SubResource("Style_upgrade_button")
+theme_override_styles/hover = SubResource("Style_upgrade_button_hover")
+theme_override_styles/pressed = SubResource("Style_upgrade_button_hover")
+theme_override_styles/disabled = SubResource("Style_upgrade_button_disabled")
+text = "購入 ¥10"
+
+[node name="Info" type="Label" parent="HUD/UpgradePanel/Margin/VBox/CapacityRow"]
+theme_override_colors/font_color = Color(0.62, 0.7, 0.78, 1)
+text = "鉱石バッグ容量を10から15へ増やす"
+
+[node name="MoveRow" type="VBoxContainer" parent="HUD/UpgradePanel/Margin/VBox"]
+theme_override_constants/separation = 4
+
+[node name="Top" type="HBoxContainer" parent="HUD/UpgradePanel/Margin/VBox/MoveRow"]
+theme_override_constants/separation = 12
+
+[node name="Name" type="Label" parent="HUD/UpgradePanel/Margin/VBox/MoveRow/Top"]
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "移動速度"
+
+[node name="Purchase" type="Button" parent="HUD/UpgradePanel/Margin/VBox/MoveRow/Top"]
+custom_minimum_size = Vector2(130, 36)
+theme_override_styles/normal = SubResource("Style_upgrade_button")
+theme_override_styles/hover = SubResource("Style_upgrade_button_hover")
+theme_override_styles/pressed = SubResource("Style_upgrade_button_hover")
+theme_override_styles/disabled = SubResource("Style_upgrade_button_disabled")
+text = "購入 ¥10"
+
+[node name="Info" type="Label" parent="HUD/UpgradePanel/Margin/VBox/MoveRow"]
+theme_override_colors/font_color = Color(0.62, 0.7, 0.78, 1)
+text = "移動速度を5.0から6.5へ上げる"
+
+[node name="Status" type="Label" parent="HUD/UpgradePanel/Margin/VBox"]
+theme_override_colors/font_color = Color(0.74, 0.82, 0.9, 1)
+text = "購入するアップグレードを選んでください"
+
+[node name="CloseHint" type="Label" parent="HUD/UpgradePanel/Margin/VBox"]
+theme_override_colors/font_color = Color(0.48, 0.56, 0.64, 1)
+text = "Escでゲームへ戻る"
+horizontal_alignment = 2
