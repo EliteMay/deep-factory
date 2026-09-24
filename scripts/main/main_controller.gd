@@ -4,6 +4,7 @@ extends Node3D
 @onready var feedback: Label = $HUD/Feedback
 @onready var inventory_label: Label = $HUD/Inventory
 @onready var money_label: Label = $HUD/Money
+@onready var control_state_label: Label = $HUD/ControlState
 
 var _feedback_token: int = 0
 
@@ -15,6 +16,8 @@ func _ready() -> void:
 		player.connect("interaction_feedback", Callable(self, "_on_feedback"))
 	if player.has_signal("inventory_changed"):
 		player.connect("inventory_changed", Callable(self, "_on_inventory_changed"))
+	if player.has_signal("control_state_changed"):
+		player.connect("control_state_changed", Callable(self, "_on_control_state_changed"))
 
 	feedback.visible = false
 
@@ -24,6 +27,9 @@ func _ready() -> void:
 			int(player.get("inventory_capacity")),
 			int(player.get("money"))
 		)
+
+	if player.has_method("refresh_control_state"):
+		player.call_deferred("refresh_control_state")
 
 
 func _on_feedback(message: String, success: bool) -> void:
@@ -46,3 +52,8 @@ func _on_feedback(message: String, success: bool) -> void:
 func _on_inventory_changed(current_count: int, capacity: int, money: int) -> void:
 	inventory_label.text = "鉱石: %d / %d" % [current_count, capacity]
 	money_label.text = "所持金: ¥%d" % money
+
+
+func _on_control_state_changed(message: String, active: bool) -> void:
+	control_state_label.text = message
+	control_state_label.visible = not active
