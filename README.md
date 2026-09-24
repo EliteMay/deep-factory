@@ -24,7 +24,7 @@
 
 ## 開発環境
 
-- Engine: Godot 4.x
+- Engine: Godot 4.7.2 stable
 - Renderer: Forward+
 - Language: GDScript
 - Target: Windows
@@ -32,7 +32,7 @@
 - Distribution: Windows executable
 - 基本方針: 可能な限り無料・Godot標準機能を優先
 
-Godotの正確な開発バージョンは、ローカル環境確認後に固定します。
+開発バージョンは **Godot 4.7.2 stable** に固定します。Game Dev Hubの共有パックで実環境のVersionを確認し、このVersionでProjectを開けることを2026-09-24に確認済みです。
 
 ## ゲームの基本ループ
 
