@@ -6,7 +6,7 @@
 
 ## 現在の段階
 
-現在は **Prototype 0.1の初期実装段階** です。Phase 1の一人称3D操作とPhase 2の採掘ループはWindows実機確認まで完了しました。Phase 3では鉱石取得、容量10の簡易Inventory、HUD、SELL端末、所持金まで実装し、Windows実機で回収・売却ループを確認する段階です。
+現在は **Prototype 0.1の初期実装段階** です。Phase 1の一人称3D操作、Phase 2の採掘、Phase 3の回収・売却ループはWindows実機確認まで完了しました。Phase 4ではUPGRADES端末、採掘速度・所持容量・移動速度の3種類、価格/効果Data、購入Panelまで実装し、Windows実機でProgression Loopを確認する段階です。
 
 最初の目標は、以下を満たす **Prototype 0.1 / MVP** の完成です。
 
@@ -74,6 +74,7 @@
 - `docs/ROADMAP.md` — 開発順序
 - `docs/SAVE_FORMAT.md` — セーブデータ方針
 - `docs/PROJECT_STRUCTURE.md` — プロジェクト構成
+- `docs/UPGRADE_UI.md` — Phase 4の端末UI調査・Interaction仕様
 
 ## 開発開始
 
@@ -94,7 +95,7 @@ Game Dev HubはDeep Factory固有の仕様を持たず、このRepositoryをSour
 5. プロジェクトを開く
 6. 右上の実行ボタンで現在のテストシーンを起動する
 
-現在のテストシーンでは、WASD移動・マウス視点操作・衝突・Escによるカーソル切替に加え、中央の岩を左クリックで採掘できます。岩は3回で壊れて鉄鉱石がDropし、Eで拾えます。右側のSELL端末へ照準を合わせてEを押すと所持鉱石を売却でき、画面右上の鉱石数と所持金へ反映されます。
+現在のテストシーンでは、WASD移動・マウス視点操作・衝突・Escによるカーソル切替に加え、5個の岩を左クリックで採掘できます。岩は3回で壊れて鉄鉱石がDropし、Eで拾えます。右側のSELL端末へEで売却し、左側のUPGRADES端末へEで入ると、採掘速度・所持容量・移動速度を購入できます。価格・効果・現在値・購入済み状態は端末Panelで確認できます。
 
 ## Windowsビルド
 

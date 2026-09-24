@@ -93,7 +93,7 @@
 
 ## Phase 3 — Inventory and Selling
 
-状態: **実装済み / Windows実機で回収・売却ループ確認待ち**
+状態: **完了 / Windows実機で回収・売却ループ確認済み**
 
 - [x] 鉱石取得
   - 担当: ChatGPT
@@ -119,7 +119,7 @@
   - 担当: ChatGPT
   - 鉄鉱石1個を5として売却額を計算する
   - 売却後に所持金を増やしHUDへ反映する
-- [ ] Windows実機で回収・売却ループ確認
+- [x] Windows実機で回収・売却ループ確認
   - 担当: あなた
   - ゲーム画面をクリックして操作へ戻れ、WASD移動・マウス視点・左クリック採掘・E操作が反応することを確認する
   - 岩を3回採掘して茶色い鉱石をDropさせる
@@ -132,14 +132,41 @@
 
 ## Phase 4 — Upgrades
 
-- [ ] 採掘速度
-- [ ] 所持容量
-- [ ] 移動速度
-- [ ] アップグレードデータ
-- [ ] 購入UI
+状態: **実装済み / Windows実機でアップグレードループ確認待ち**
+
+- [x] 採掘速度
+  - 担当: ChatGPT
+  - アップグレード端末で5円を支払うと採掘間隔を0.45秒から0.25秒へ短縮する
+  - 購入後は端末UIに現在値0.25秒と「購入済み」を表示する
+- [x] 所持容量
+  - 担当: ChatGPT
+  - 10円を支払うと鉱石バッグ容量を10から15へ増やす
+  - 購入後はHUDの容量表示へ即時反映する
+- [x] 移動速度
+  - 担当: ChatGPT
+  - 10円を支払うと移動速度を5.0から6.5へ上げる
+  - 購入後は端末UIに現在値6.5と「購入済み」を表示する
+- [x] アップグレードデータ
+  - 担当: ChatGPT
+  - 価格・説明・最大Level・効果を `data/upgrades.json` へ分離する
+  - Playerは購入済みLevelだけをRuntime Stateとして保持する
+- [x] 購入UI
+  - 担当: ChatGPT
+  - Test Map左側へUPGRADES端末を配置し、照準を合わせてEで開く
+  - 端末Panelで採掘速度・所持容量・移動速度の価格、効果、現在値を確認して購入できる
+  - EscでPanelを閉じてゲーム操作へ戻れる
+  - SatisfactoryのHUB Terminalにある「World内の端末へEで入り、必要Cost/RewardをUIで確認する」Interaction Patternだけを参考にし、見た目や名称はコピーしない
+- [ ] Windows実機でアップグレードループ確認
+  - 担当: あなた
+  - 5個の岩を採掘して鉱石を拾い、SELL端末でまとめて売って所持金が25円になることを確認する
+  - 左側のUPGRADES端末へ照準を合わせてEを押し、3種類のアップグレード・価格・現在値が表示されることを確認する
+  - 採掘速度を5円で購入し、所持金20円・現在0.25秒・「購入済み」になることを確認する
+  - 所持容量を10円で購入し、所持金10円・HUDが「鉱石: 0 / 15」になることを確認する
+  - 移動速度を10円で購入し、所持金0円・現在6.5・「購入済み」になることを確認する
+  - Escで端末を閉じ、WASD・マウス視点・採掘操作へ戻れることを確認する
 
 完了条件:
-売却したお金を使って明確に強くなれる。
+売却したお金を使って3種類のアップグレードを購入でき、購入直後に効果と表示が変わる。
 
 ## Phase 5 — First Automation
 
@@ -249,4 +276,13 @@ Phase 3の回収・売却実装はRepository側で追加済み。2026-09-24に�
 
 再発防止としてGodot 4.7.2 CIへGameplay Input Smoke Testを追加し、Input Action存在・WASD移動・EscでCapture解除Intent・左クリックでCapture再要求Intentを確認する。またGodotがScript Errorを出してもProcess exit code 0になる場合があるため、Import/Main Scene logの `SCRIPT ERROR` / `ERROR:` もCIで明示検出して失敗させる。
 
-実際のWindows Window FocusとMouse Capture復旧はUser実機確認が終わるまでPhase 3完了とは扱わない。
+Game Dev Hub共有パックで、Repository commit `4e8b92a7` / Godot `4.7.2.stable.official.ed1daf0bf` のPhase 3確認5項目がすべてPassした。
+
+確認済み:
+- 修正版でWASD・マウス視点・左クリック採掘・E操作が反応する
+- 岩を3回採掘して鉱石がDropする
+- Eで鉄鉱石を取得しHUDが1 / 10になる
+- SELL端末で1個売却して+5円になる
+- 売却後に鉱石0 / 10・所持金5円になる
+
+このEvidenceによりPhase 3を完了とする。Phase 4はRepository側で実装済みだが、購入UI・購入後効果・ゲーム操作への復帰はWindows実機確認が終わるまでPhase 4完了とは扱わない。

@@ -1,0 +1,35 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/upgrade_station.gd" id="1_upgrade"]
+
+[sub_resource type="StandardMaterial3D" id="Material_upgrade"]
+albedo_color = Color(0.14, 0.22, 0.42, 1)
+emission_enabled = true
+emission = Color(0.04, 0.08, 0.2, 1)
+metallic = 0.3
+roughness = 0.38
+
+[sub_resource type="BoxMesh" id="BoxMesh_upgrade"]
+material = SubResource("Material_upgrade")
+size = Vector3(1.8, 1.2, 1.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape_upgrade"]
+size = Vector3(1.8, 1.2, 1.2)
+
+[node name="UpgradeStation" type="StaticBody3D"]
+script = ExtResource("1_upgrade")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.6, 0)
+mesh = SubResource("BoxMesh_upgrade")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.6, 0)
+shape = SubResource("BoxShape_upgrade")
+
+[node name="Label3D" type="Label3D" parent="."]
+position = Vector3(0, 1.45, 0)
+text = "UPGRADES"
+font_size = 42
+outline_size = 8
+billboard = 1
