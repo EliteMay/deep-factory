@@ -36,7 +36,7 @@ func _ready() -> void:
 	_emit_inventory_changed()
 
 
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_cursor"):
 		_toggle_cursor()
 		get_viewport().set_input_as_handled()
