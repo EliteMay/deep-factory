@@ -3,6 +3,7 @@ extends CharacterBody3D
 signal mining_feedback(message: String, success: bool)
 signal interaction_feedback(message: String, success: bool)
 signal inventory_changed(current_count: int, capacity: int, money: int)
+signal control_state_changed(message: String, active: bool)
 
 @export_category("Movement")
 @export var move_speed: float = 5.0
@@ -29,11 +30,26 @@ var ore_counts: Dictionary = {}
 var ore_values: Dictionary = {}
 var ore_names: Dictionary = {}
 var money: int = 0
+var _wants_mouse_capture: bool = true
+var _suppress_mining_until_msec: int = 0
 
 
 func _ready() -> void:
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	set_process_input(true)
 	_emit_inventory_changed()
+	call_deferred("_request_gameplay_focus")
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		control_state_changed.emit("ゲーム画面をクリックして操作開始", false)
+	elif what == NOTIFICATION_APPLICATION_FOCUS_IN:
+		if _wants_mouse_capture:
+			_suppress_mining_until_msec = Time.get_ticks_msec() + 200
+			call_deferred("_capture_mouse")
+		else:
+			control_state_changed.emit("カーソル表示中。ゲーム画面をクリックで操作へ戻る", false)
 
 
 func _input(event: InputEvent) -> void:
@@ -48,21 +64,30 @@ func _input(event: InputEvent) -> void:
 		and event.pressed
 		and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED
 	):
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		_wants_mouse_capture = true
+		_suppress_mining_until_msec = Time.get_ticks_msec() + 200
+		var window := get_window()
+		if window:
+			window.grab_focus()
+		call_deferred("_capture_mouse")
 		get_viewport().set_input_as_handled()
 		return
 
-	if event.is_action_pressed("interact") and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+	if event.is_action_pressed("interact") and _gameplay_input_active():
 		_try_interact()
 		get_viewport().set_input_as_handled()
 		return
 
-	if event.is_action_pressed("mine") and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+	if (
+		event.is_action_pressed("mine")
+		and _gameplay_input_active()
+		and Time.get_ticks_msec() >= _suppress_mining_until_msec
+	):
 		_try_mine()
 		get_viewport().set_input_as_handled()
 		return
 
-	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+	if event is InputEventMouseMotion and _gameplay_input_active():
 		rotate_y(-event.relative.x * mouse_sensitivity)
 		camera_pivot.rotate_x(-event.relative.y * mouse_sensitivity)
 		camera_pivot.rotation.x = clamp(
@@ -95,6 +120,44 @@ func _physics_process(delta: float) -> void:
 	velocity.z = move_toward(velocity.z, target_velocity.z, change_rate * delta)
 
 	move_and_slide()
+
+
+func _request_gameplay_focus() -> void:
+	var window := get_window()
+	if window:
+		window.grab_focus()
+	_capture_mouse()
+
+
+func _capture_mouse() -> void:
+	var window := get_window()
+	if window == null or not window.has_focus():
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		control_state_changed.emit("ゲーム画面をクリックして操作開始", false)
+		return
+
+	_wants_mouse_capture = true
+	_suppress_mining_until_msec = Time.get_ticks_msec() + 200
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	control_state_changed.emit("", true)
+
+
+func refresh_control_state() -> void:
+	if _gameplay_input_active():
+		control_state_changed.emit("", true)
+	elif _wants_mouse_capture:
+		control_state_changed.emit("ゲーム画面をクリックして操作開始", false)
+	else:
+		control_state_changed.emit("カーソル表示中。ゲーム画面をクリックで操作へ戻る", false)
+
+
+func _gameplay_input_active() -> bool:
+	var window := get_window()
+	return (
+		window != null
+		and window.has_focus()
+		and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
+	)
 
 
 func _try_mine() -> void:
@@ -222,6 +285,13 @@ func _emit_inventory_changed() -> void:
 
 func _toggle_cursor() -> void:
 	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		_wants_mouse_capture = false
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		control_state_changed.emit("カーソル表示中。ゲーム画面をクリックで操作へ戻る", false)
 	else:
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		_wants_mouse_capture = true
+		_suppress_mining_until_msec = Time.get_ticks_msec() + 200
+		var window := get_window()
+		if window:
+			window.grab_focus()
+		call_deferred("_capture_mouse")
