@@ -241,4 +241,8 @@ Phase 2のWindows実機確認もRepository commit `53e2c234` / Godot `4.7.2.stab
 - 岩を3回採掘すると破壊される
 - 茶色い鉱石がWorldへDropする
 
-Phase 3の回収・売却実装はRepository側で追加済み。2026-09-24に「ゲーム画面へカーソルを合わせても操作できない」入力Regression報告があり、Gameplay入力を `_unhandled_input()` ではなく `_input()` で直接処理する修正を追加した。実際の入力復旧・取得・HUD・売却・所持金反映はWindows実機確認が終わるまでPhase 3完了とは扱わない。
+Phase 3の回収・売却実装はRepository側で追加済み。2026-09-24に「ゲーム画面へカーソルを合わせても操作できない」入力Regression報告があり、最初の `_unhandled_input()` → `_input()` 修正だけでは実機で復旧しなかった。
+
+追加対策として、Game WindowのFocusとMouse CaptureをPlayer側で明示管理するよう変更した。起動時に `Window.grab_focus()` を要求し、Focus復帰時にMouse Captureを再適用、Focusを失った時はCursorを表示する。操作可能でない時はHUDへ「ゲーム画面をクリックして操作開始」と表示する。HUD LabelはMouse Inputを遮らないよう `mouse_filter = IGNORE` にした。
+
+またGodot 4.7.2 CIへGameplay Input Smoke Testを追加し、Input Action存在・WASD移動・EscでCapture解除Intent・左クリックでCapture再要求Intentを自動確認する。実際のWindows Window FocusとMouse Capture復旧はUser実機確認が終わるまでPhase 3完了とは扱わない。
