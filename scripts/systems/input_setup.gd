@@ -5,6 +5,7 @@ const DEFAULT_BINDINGS := {
 	"move_backward": KEY_S,
 	"move_left": KEY_A,
 	"move_right": KEY_D,
+	"interact": KEY_E,
 	"toggle_cursor": KEY_ESCAPE,
 }
 
