@@ -172,7 +172,7 @@
 
 ## Phase 5 — First Automation
 
-状態: **実装済み / Windows実機で最初の自動化ループ確認待ち**
+状態: **完了 / Windows実機で最初の自動化ループ確認済み**
 
 - [x] 小型採掘機
   - 担当: ChatGPT
@@ -207,7 +207,7 @@
   - 採掘機へ照準を合わせてEを押すと内部鉱石をPlayer Inventoryへ移す
   - Player Inventory容量を超えた分は採掘機側へ残す
   - 回収後は採掘機LabelとHUD双方へ即時反映する
-- [ ] Windows実機で最初の自動化ループ確認
+- [x] Windows実機で最初の自動化ループ確認
   - 担当: あなた
   - ゲームを新しく起動し、岩を3個掘って拾い、SELL端末で売って所持金15円にする
   - UPGRADES端末を開き「小型採掘機 / 購入して配置 ¥15」が表示されることを確認する
@@ -358,3 +358,20 @@ Game Dev Hub共有パックでRepository commit `cc733107` / Godot `4.7.2.stable
 - Escで端末を閉じ、WASD・マウス視点・採掘へ復帰できる
 
 このEvidenceによりPhase 4を完了とする。
+
+### 2026-09-24 Phase 5 Windows実機確認完了
+
+Game Dev Hub共有パックでRepository commit `a14b80a6` / Godot `4.7.2.stable.official.ed1daf0bf` のPhase 5確認8項目がすべてPassし、結果はstaleではない。
+
+確認済み:
+- 岩3個を採掘・回収・売却して所持金15円にできる
+- UPGRADES端末に「小型採掘機 / 購入して配置 ¥15」が表示される
+- 岩や端末と重なる配置Previewは赤くなり、設置不可のまま維持される
+- Escで配置をキャンセルすると15円が返金される
+- 何もない場所では緑の配置Previewになり、左クリックで小型採掘機を設置できる
+- 約10秒で内部ストレージが5 / 5になり、それ以上増えない
+- Eで回収すると採掘機が0 / 5、Player HUDが鉱石5 / 10になる
+- 5個売却後に所持金25円になる
+
+このEvidenceによりPhase 5を完了とする。次はPhase 6 — Save / Loadへ進む。
+
