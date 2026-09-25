@@ -132,8 +132,13 @@ func _assert_restored_state(
 		_fail("inventory capacity effect was not restored")
 	if not is_equal_approx(float(player.get("move_speed")), 6.5):
 		_fail("move speed effect was not restored")
-	if player.global_position.distance_to(Vector3(1.5, 1.0, -2.0)) > 0.01:
-		_fail("Player position was not restored")
+	if player.global_position.distance_to(expected_player_position) > 0.1:
+		_fail(
+			"Player position was not restored / expected="
+			+ str(expected_player_position)
+			+ " actual="
+			+ str(player.global_position)
+		)
 
 	var miners: Array[Node] = []
 	for node in get_tree().get_nodes_in_group("small_miners"):
