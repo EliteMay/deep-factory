@@ -223,52 +223,62 @@
 
 ## Phase 6 — Save / Load
 
-状態: **実装中 / セーブモデル完了**
+状態: **実装中 / Foundation統合済み / CI確認待ち / Windows実機確認待ち**
 
 - [x] セーブモデル
   - 担当: ChatGPT
-  - `scripts/systems/save_model.gd` にMVPの保存対象とJSON互換のSnapshot形式を定義する
-  - 所持金、Inventory、Upgrade Level、Player位置、設置済みMachine、Machine内部StorageをSnapshotへまとめる
-  - 静的な名称・価格・効果値はセーブへ重複保存せず、Repositoryの `data/*.json` を正本として扱う
-  - `MainController.build_save_snapshot()` から現在のRuntime Stateを1つのDictionaryとして取得できるようにする
-  - Save Model Smoke Testで必須項目とMachine状態がSnapshotへ入ることを確認する
-- [ ] セーブバージョン
+  - `scripts/systems/save_model.gd` にMVPの保存対象とJSON互換Snapshotを定義
+  - 所持金、Inventory、Upgrade Level、Player位置、設置済みMachine、Machine内部Storageを保存対象にする
+  - 静的な名称・価格・効果値は `data/*.json` を正本としてSaveへ重複保存しない
+- [x] セーブバージョン
   - 担当: ChatGPT
-  - MVPの正式Versionを `save_version = 1` として固定する
-  - 現在Version、古いVersion、未知の新しいVersionを区別するCompatibility判定を実装する
-  - 古いVersionはMigration入口へ渡し、未知の新しいVersionは既存データを壊さず安全に拒否する
-  - Version判定のSmoke Testを追加する
-- [ ] 自動保存
+  - Deep FactoryのGame Schemaを `save_version = 1` として固定
+  - Foundation Save envelopeに `game_schema_version = 1` を持たせる
+  - Foundation Schema / Game Schemaの新旧判定を共通Save Systemへ委譲
+  - 未知の新Versionは既存Saveを上書きせず拒否する
+- [x] 自動保存
   - 担当: ChatGPT
-  - SnapshotをJSON化して `user://save.json` へ保存するSave Storeを追加する
-  - 主要な進行変更後とゲーム終了時に保存要求を出せる構造にする
-  - 保存途中で既存セーブを直接壊さないよう一時File経由の置換を使う
-  - Headless Testでは一時保存先を使い、Repositoryへ実セーブを作らない
-- [ ] 手動保存の要否判断
+  - Foundationの `AutoSaveService` と `SaveSystem` を導入
+  - 主要な進行変更後はDebounceして保存要求を出す
+  - Machine内部Storageの自然増加も15秒Periodic Auto Saveで拾う
+  - Window終了前はGame FlowのSafe Quit Hookから最新Snapshotを保存する
+  - Saveは一時File検証 → Atomic置換 → Backupの順で処理する
+  - Headlessの既存Gameplay Testでは実Saveを無効化し、専用Save Testだけ一時 `user://` Pathを使う
+- [x] 手動保存の要否判断
   - 担当: ChatGPT
-  - Prototype 0.1で手動保存Buttonが必要か、Auto Saveのみで十分かを実装状況とUXから決定する
-  - 採用しない場合も理由を `docs/SAVE_FORMAT.md` へ記録する
-  - 手動保存を採用する場合は既存操作を邪魔しない最小UIにする
-- [ ] ロード
+  - Prototype 0.1では手動保存Buttonを採用しない
+  - 主要Event + 15秒Periodic + 終了時SaveでMVPのSingle-player Loopを保護する
+  - UIを増やさず、手動Saveが必要になる具体的UXが出た段階で再評価する
+- [x] ロード
   - 担当: ChatGPT
   - 起動時に `user://save.json` を読み込み、所持金・Inventory・Upgrade・Player位置を復元する
   - 設置済み小型採掘機を再生成し、位置と内部Storageを復元する
-  - Load後にHUD、Upgrade効果、Machine設置上限がRuntime Stateと一致するよう再計算する
-  - 「保存 → Runtime変更 → Load」で元の状態へ戻るSmoke Testを追加する
-- [ ] 破損時の最低限の保護
+  - Upgrade効果、HUD、Machine設置上限をSave Stateから再構築する
+  - Inventoryの売却額・名称はGame Definitionから再解決する
+- [x] 破損時の最低限の保護
   - 担当: ChatGPT
-  - JSON Parse失敗、必須Field欠落、未知の新VersionでCrashしない
-  - 読み込み失敗時は破損Fileを上書きせず、新規Gameとして安全に起動できる
-  - 直前の正常データを復旧できる最低限のBackup方針を入れる
+  - JSON Parse失敗、必須Field欠落、不正Game Payload、未知の新VersionでCrashしない
+  - 正常Backupがあれば自動復旧する
+  - Primary / Backupとも利用できない場合は新規状態で起動するが、そのSessionでは元Saveを自動上書きしない
+- [x] Godot Game Foundation Pilot
+  - 担当: ChatGPT
+  - Foundation 0.8.0-devを `addons/game_foundation/` に導入
+  - `.game-foundation.json` でFoundation Version / Commit / Managed Pathを追跡
+  - Input初期化をFoundation Input Systemへ移行
+  - SettingsのAudio / Display / Mouse Sensitivity defaultをFoundation Settings Systemで読込・適用
+  - Safe QuitをFoundation Game Flowへ接続
+  - Foundation管理範囲は `addons/game_foundation/` だけとし、Game固有CodeをFoundationへ混ぜない
 - [ ] Windows実機でセーブ・ロード確認
   - 担当: あなた
+  - Game Dev Hubをv0.1.12以降へ更新し、Deep FactoryのGame Foundation欄に `v0.8.0-dev` が表示されることを確認する
   - 所持金・鉱石・Upgrade・小型採掘機がある状態まで進めてゲームを終了する
   - Game Dev Hubからゲームをもう一度起動し、Player位置と主要進行が復元されることを確認する
   - 小型採掘機の設置位置と内部Storage数が再起動前と一致することを確認する
   - 復元後も採掘・回収・売却・Upgrade・自動生成が通常通り続けられることを確認する
+  - Game Dev Hubの確認結果へまとめて記録する
 
 完了条件:
-ゲーム再起動後に主要進行状況が復元され、破損または非対応セーブでもゲームが安全に起動できる。
+ゲーム再起動後に主要進行状況が復元され、破損または非対応セーブでもゲームが安全に起動できることをWindows実機で確認する。
 
 ## Phase 7 — Prototype 0.1 Validation
 
@@ -417,3 +427,17 @@ Game Dev Hub共有パックでRepository commit `a14b80a6` / Godot `4.7.2.stable
 Phase 6開始時点でRoadmapの各Taskに具体手順が無く、Game Dev Hubが汎用の「詳細手順がRoadmapにまだ書かれていません」を表示していたため、Phase 6の全Taskを実装可能な粒度へ具体化した。
 
 最初の「セーブモデル」ではMVPの正式Snapshot形をコードと文書へ定義し、Runtimeから所持金・Inventory・Upgrade・Player位置・設置済みMachine・Machine内部Storageを取得できるようにした。Diskへの書き込みやLoad処理は後続Taskで追加する。
+
+### 2026-09-25 Godot Game Foundation Pilot
+
+共通基盤を各Gameで作り直さない方針へ移行し、Deep Factoryを最初の実利用PilotとしてFoundation 0.8.0-devへ接続した。
+
+- Foundation source: `EliteMay/godot-game-foundation`
+- Installed commit: `12a018a2`
+- Managed path: `addons/game_foundation/`
+- Game側Source of Truthは引き続きDeep Factory Repository
+- Save Payloadの内容はDeep Factory側が定義し、File安全性・Version envelope・Backup・Atomic writeはFoundationへ委譲
+- Input / Settings / Game FlowもFoundation APIへ接続
+- Foundation更新はGame Dev HubからManaged Pathだけを更新する
+
+Phase 1〜5のWindows実機Evidenceは再確認対象にしない。今回Userへ依頼するのはPhase 6の新しいSave / LoadとFoundation表示に関する確認だけ。
