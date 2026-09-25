@@ -42,6 +42,7 @@ func _run() -> void:
 	first.add_child(miner)
 	await get_tree().process_frame
 
+	var saved_player_position: Vector3 = first_player.global_position
 	var save_result: Dictionary = first.call("save_now")
 	if not bool(save_result.get("ok", false)):
 		_fail("first save failed: " + String(save_result.get("code", "unknown")))
@@ -54,7 +55,7 @@ func _run() -> void:
 		_finish()
 		return
 
-	_assert_restored_state(second, 42, 3, 4)
+	_assert_restored_state(second, 42, 3, 4, saved_player_position)
 
 	var second_player := second.get_node_or_null("Player") as CharacterBody3D
 	second_player.set("money", 50)
@@ -78,7 +79,7 @@ func _run() -> void:
 		_finish()
 		return
 
-	_assert_restored_state(recovered, 42, 3, 4)
+	_assert_restored_state(recovered, 42, 3, 4, saved_player_position)
 	if bool(recovered.get("_save_writes_blocked")):
 		_fail("valid backup recovery should not block future writes")
 
@@ -107,7 +108,8 @@ func _assert_restored_state(
 	game: Node,
 	expected_money: int,
 	expected_ore: int,
-	expected_machine_storage: int
+	expected_machine_storage: int,
+	expected_player_position: Vector3
 ) -> void:
 	var player := game.get_node_or_null("Player") as CharacterBody3D
 	if player == null:
