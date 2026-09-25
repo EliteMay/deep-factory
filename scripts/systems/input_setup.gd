@@ -1,44 +1,104 @@
 extends Node
 
-const DEFAULT_BINDINGS := {
-	"move_forward": KEY_W,
-	"move_backward": KEY_S,
-	"move_left": KEY_A,
-	"move_right": KEY_D,
-	"interact": KEY_E,
-	"toggle_cursor": KEY_ESCAPE,
+const InputSystemScript = preload("res://addons/game_foundation/input/input_system.gd")
+
+const INPUT_CONTRACT: Dictionary = {
+	"move_forward": {
+		"deadzone": 0.5,
+		"events": [{
+			"type": "key",
+			"keycode": 0,
+			"physical_keycode": KEY_W,
+			"unicode": 0,
+			"shift": false,
+			"ctrl": false,
+			"alt": false,
+			"meta": false,
+		}],
+	},
+	"move_backward": {
+		"deadzone": 0.5,
+		"events": [{
+			"type": "key",
+			"keycode": 0,
+			"physical_keycode": KEY_S,
+			"unicode": 0,
+			"shift": false,
+			"ctrl": false,
+			"alt": false,
+			"meta": false,
+		}],
+	},
+	"move_left": {
+		"deadzone": 0.5,
+		"events": [{
+			"type": "key",
+			"keycode": 0,
+			"physical_keycode": KEY_A,
+			"unicode": 0,
+			"shift": false,
+			"ctrl": false,
+			"alt": false,
+			"meta": false,
+		}],
+	},
+	"move_right": {
+		"deadzone": 0.5,
+		"events": [{
+			"type": "key",
+			"keycode": 0,
+			"physical_keycode": KEY_D,
+			"unicode": 0,
+			"shift": false,
+			"ctrl": false,
+			"alt": false,
+			"meta": false,
+		}],
+	},
+	"interact": {
+		"deadzone": 0.5,
+		"events": [{
+			"type": "key",
+			"keycode": 0,
+			"physical_keycode": KEY_E,
+			"unicode": 0,
+			"shift": false,
+			"ctrl": false,
+			"alt": false,
+			"meta": false,
+		}],
+	},
+	"toggle_cursor": {
+		"deadzone": 0.5,
+		"events": [{
+			"type": "key",
+			"keycode": 0,
+			"physical_keycode": KEY_ESCAPE,
+			"unicode": 0,
+			"shift": false,
+			"ctrl": false,
+			"alt": false,
+			"meta": false,
+		}],
+	},
+	"mine": {
+		"deadzone": 0.5,
+		"events": [{
+			"type": "mouse_button",
+			"button_index": MOUSE_BUTTON_LEFT,
+			"shift": false,
+			"ctrl": false,
+			"alt": false,
+			"meta": false,
+		}],
+	},
 }
 
 
 func _ready() -> void:
-	for action_name in DEFAULT_BINDINGS:
-		_ensure_key_action(
-			StringName(action_name),
-			int(DEFAULT_BINDINGS[action_name])
+	var result: Dictionary = InputSystemScript.restore_bindings(INPUT_CONTRACT)
+	if not bool(result.get("ok", false)):
+		push_error(
+			"InputSetup: Foundation Input Systemの初期化に失敗しました: "
+			+ String(result.get("code", "unknown"))
 		)
-
-	_ensure_mouse_action(&"mine", MOUSE_BUTTON_LEFT)
-
-
-func _ensure_key_action(action_name: StringName, physical_keycode: int) -> void:
-	if not InputMap.has_action(action_name):
-		InputMap.add_action(action_name)
-
-	if not InputMap.action_get_events(action_name).is_empty():
-		return
-
-	var event := InputEventKey.new()
-	event.physical_keycode = physical_keycode
-	InputMap.action_add_event(action_name, event)
-
-
-func _ensure_mouse_action(action_name: StringName, button_index: int) -> void:
-	if not InputMap.has_action(action_name):
-		InputMap.add_action(action_name)
-
-	if not InputMap.action_get_events(action_name).is_empty():
-		return
-
-	var event := InputEventMouseButton.new()
-	event.button_index = button_index
-	InputMap.action_add_event(action_name, event)

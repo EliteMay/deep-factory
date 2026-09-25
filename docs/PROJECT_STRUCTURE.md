@@ -4,9 +4,13 @@ MVPで必要な責務を分け、静的BalanceとRuntime Logicを分離する。
 
 ```text
 deep-factory/
+├─ .game-foundation.json
 ├─ project.godot
 ├─ README.md
 ├─ PROJECT_LEARNINGS.md
+│
+├─ addons/
+│  └─ game_foundation/       # Game Dev Hubが更新できる共通Runtime基盤
 │
 ├─ scenes/
 │  ├─ main/
@@ -39,7 +43,9 @@ deep-factory/
 │  ├─ core_loop_smoke.*
 │  ├─ upgrade_smoke.*
 │  ├─ automation_smoke.*
-│  └─ save_model_smoke.*
+│  ├─ save_model_smoke.*
+│  ├─ foundation_pilot_smoke.*
+│  └─ foundation_save_load_smoke.*
 │
 └─ docs/
    ├─ GAME_DESIGN.md
@@ -48,7 +54,8 @@ deep-factory/
    ├─ SAVE_FORMAT.md
    ├─ PROJECT_STRUCTURE.md
    ├─ UPGRADE_UI.md
-   └─ AUTOMATION_01.md
+   ├─ AUTOMATION_01.md
+   └─ FOUNDATION_INTEGRATION.md
 ```
 
 ## データ方針
@@ -85,8 +92,14 @@ Machine Typeが増えた時点で、共通Machine責務を `scripts/machines/` �
 - Upgrade
 - First Automation
 - Save Model Snapshot
+- Foundation Integration Contract
+- Foundation Save → Load / Backup Recovery
 
 Game Dev HubはEditorを介さず起動するため、CIではImport前のDirect Cold Startも継続する。
+
+## Foundation Boundary
+
+`.game-foundation.json` が導入Version / Commit / Managed Pathを記録する。Game Dev HubによるFoundation更新対象は `addons/game_foundation/` だけで、`scripts/`、`scenes/`、`data/`、`tests/`、`docs/` はDeep Factory固有領域として自動上書きしない。
 
 ## assets
 

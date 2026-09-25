@@ -71,25 +71,33 @@ Phase 6のセーブモデル実装時点で、MVPのSnapshot形を次のよう�
 
 ## バージョニング
 
-全セーブは必ず `save_version` を持つ。
+Deep FactoryのGame SchemaはMVPでVersion 1。
 
-MVPの最初のSchemaはVersion 1。
+Foundation導入後は2層でVersionを持つ。
 
-後続の「セーブバージョン」Taskで次を実装する。
+```text
+Foundation Save Envelope
+├─ foundation_schema_version
+└─ game_schema_version = 1
+        ↓
+Deep Factory Payload
+└─ save_version = 1
+```
 
-1. 現在Versionと一致 → 通常ロード
-2. 古いVersion → Migration入口へ渡す
-3. 未知の新しいVersion → セーブを上書きせず安全に拒否する
+Foundation側はFoundation SchemaとGame Schemaの互換性を判定し、未知の新Versionを既存Fileへ上書きしない。Deep Factory側はPayload内の `save_version` とDomain FieldをValidationしてからRuntimeへ反映する。
 
 ## 保存先
 
 Godotの `user://` 配下を使用する。
 
-予定Path:
+Path:
 
 ```text
 user://save.json
+user://save.json.bak
 ```
+
+Primary Saveは一時Fileへ完全なJSONを書いて再読込Validation後に置換する。既存の正常Primaryは更新前にBackupへ保持する。
 
 Repository内に実プレイヤーのセーブデータをコミットしない。
 
@@ -97,7 +105,38 @@ Repository内に実プレイヤーのセーブデータをコミットしない�
 
 `MainController.build_save_snapshot()` が `SaveModel.build_snapshot()` を使用し、現在のGame StateをJSON互換のDictionaryへ変換する。
 
-この段階ではDisk書き込みは行わない。Disk I/O、自動保存、Load、Backupは後続Taskで追加する。
+Disk I/OはGodot Game Foundationの `SaveSystem` / `AutoSaveService` へ委譲する。FoundationはMoneyやMachine等のGame固有Fieldを解釈しない。
+
+## Auto Save Policy
+
+Prototype 0.1では手動保存Buttonを置かずAuto Saveのみとする。
+
+- Inventory / Money等の主要進行変更後: Debounce Save
+- Upgrade / Machine設置・キャンセル後: Save要求
+- Machine Storageの自然増加: 15秒Periodic Save
+- Window終了: Safe Quit Hookで最新Snapshotを即時保存
+- Machine配置途中: 購入確定前Stateを保存しない
+- 配置途中で終了: 購入代金を返金してから保存
+
+手動保存UIは、Playtestで明確な必要性が出た場合に再評価する。
+
+## Load / Recovery
+
+起動時にPrimary Saveを読み込み、Payloadを全体ValidationしてからRuntimeへ反映する。
+
+復元対象:
+
+- Money
+- Inventory
+- Upgrade Levelと効果
+- Player位置
+- Small Miner位置
+- Small Miner内部Storage
+- Machine設置数
+
+Inventoryの名称・売却額、Upgrade効果、Machine生成間隔・最大StorageはSaveへ複製せず、現在の `data/*.json` から再解決する。
+
+Primaryが壊れていて正常Backupがある場合はBackupから復旧する。Primary / Backupとも利用できない、または非対応Versionの場合はCrashせず新規Runtime Stateで起動するが、そのSessionでは元Saveを自動上書きしない。
 
 ## 将来候補
 

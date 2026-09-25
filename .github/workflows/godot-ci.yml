@@ -112,3 +112,25 @@ jobs:
             exit 1
           fi
           grep -q "SAVE_MODEL_SMOKE: PASS" save-model-smoke.log
+
+      - name: Run Foundation pilot smoke test
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 20s ./Godot_v4.7.2-stable_linux.x86_64 --headless --path . --scene res://tests/foundation_pilot_smoke.tscn 2>&1 | tee foundation-pilot-smoke.log
+          if grep -Eq "SCRIPT ERROR|(^|[[:space:]])ERROR:" foundation-pilot-smoke.log; then
+            echo "Foundation pilot smoke test log contains an error."
+            exit 1
+          fi
+          grep -q "FOUNDATION_PILOT_SMOKE: PASS" foundation-pilot-smoke.log
+
+      - name: Run Foundation save load smoke test
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 30s ./Godot_v4.7.2-stable_linux.x86_64 --headless --path . --scene res://tests/foundation_save_load_smoke.tscn 2>&1 | tee foundation-save-load-smoke.log
+          if grep -Eq "SCRIPT ERROR|(^|[[:space:]])ERROR:" foundation-save-load-smoke.log; then
+            echo "Foundation save load smoke test log contains an error."
+            exit 1
+          fi
+          grep -q "FOUNDATION_SAVE_LOAD_SMOKE: PASS" foundation-save-load-smoke.log
