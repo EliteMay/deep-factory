@@ -34,7 +34,7 @@ func _run() -> void:
 		"inventory_capacity": 1,
 		"move_speed": 1,
 	})
-	first_player.global_position = Vector3(1.5, 1.0, -2.0)
+	first_player.global_position = Vector3(1.5, 0.05, -2.0)
 
 	var miner := SmallMinerScene.instantiate() as StaticBody3D
 	miner.position = Vector3(4.0, 0.0, 2.0)
