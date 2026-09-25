@@ -223,7 +223,7 @@
 
 ## Phase 6 — Save / Load
 
-状態: **実装中 / Foundation統合済み / CI確認待ち / Windows実機確認待ち**
+状態: **実装完了 / Foundation統合済み / CI確認済み / Windows実機確認待ち**
 
 - [x] セーブモデル
   - 担当: ChatGPT
@@ -441,3 +441,24 @@ Phase 6開始時点でRoadmapの各Taskに具体手順が無く、Game Dev Hub�
 - Foundation更新はGame Dev HubからManaged Pathだけを更新する
 
 Phase 1〜5のWindows実機Evidenceは再確認対象にしない。今回Userへ依頼するのはPhase 6の新しいSave / LoadとFoundation表示に関する確認だけ。
+
+### 2026-09-25 Phase 6 Foundation CI確認
+
+PR #10のcommit `ed9f437e` でGodot CI run `36086867458` が成功した。
+
+確認済み:
+
+- Direct Cold Start
+- Godot Import
+- Main Scene Load
+- Gameplay Input Smoke
+- Upgrade Smoke
+- Core Loop Regression
+- First Automation Smoke
+- Save Model Smoke
+- Foundation Pilot Smoke
+- Foundation Save → Load / Backup Recovery Smoke
+
+Save / Load Testでは、保存時点のPlayer実Positionを基準に復元値を比較するよう修正し、Physicsによる床へのsettleをSave復元失敗と誤判定しないようにした。
+
+自動検証は完了。Phase 6の残りはWindows実機での再起動復元確認のみ。

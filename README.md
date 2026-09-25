@@ -6,7 +6,7 @@
 
 ## 現在の段階
 
-現在は **Prototype 0.1の初期実装段階** です。Phase 1の一人称3D操作、Phase 2の採掘、Phase 3の回収・売却、Phase 4のアップグレード、Phase 5の最初の自動化までWindows実機確認が完了しました。Phase 6のSave / LoadはGodot Game Foundationを使った実装まで進めています。Foundation連携とSave → Load / Backup復旧をCIで確認し、最後にWindows実機で再起動復元を確認します。
+現在は **Prototype 0.1の初期実装段階** です。Phase 1の一人称3D操作、Phase 2の採掘、Phase 3の回収・売却、Phase 4のアップグレード、Phase 5の最初の自動化までWindows実機確認が完了しました。Phase 6のSave / LoadはGodot Game Foundationを使った実装とCI確認まで完了しました。Save → Load、Upgrade効果・Player位置・小型採掘機の復元、Backup復旧まで自動検証済みで、残る完了条件はWindows実機での再起動復元確認です。
 
 最初の目標は、以下を満たす **Prototype 0.1 / MVP** の完成です。
 
