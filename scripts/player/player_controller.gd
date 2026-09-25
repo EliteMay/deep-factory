@@ -39,9 +39,15 @@ var _wants_mouse_capture: bool = true
 var _suppress_mining_until_msec: int = 0
 var _upgrade_menu_open: bool = false
 var _placement_mode: bool = false
+var _base_move_speed: float = 0.0
+var _base_mining_cooldown: float = 0.0
+var _base_inventory_capacity: int = 0
 
 
 func _ready() -> void:
+	_base_move_speed = move_speed
+	_base_mining_cooldown = mining_cooldown
+	_base_inventory_capacity = inventory_capacity
 	set_process_input(true)
 	_emit_inventory_changed()
 	if DisplayServer.get_name() != "headless":
@@ -270,6 +276,72 @@ func add_money(amount: int) -> void:
 
 func get_upgrade_level(upgrade_id: StringName) -> int:
 	return int(upgrade_levels.get(String(upgrade_id), 0))
+
+
+func restore_progress(
+	saved_money: int,
+	saved_inventory: Dictionary,
+	saved_upgrades: Dictionary,
+	ore_definitions: Dictionary,
+	upgrade_definitions: Dictionary
+) -> void:
+	money = maxi(0, saved_money)
+	ore_counts.clear()
+	ore_values.clear()
+	ore_names.clear()
+	upgrade_levels.clear()
+
+	move_speed = _base_move_speed
+	mining_cooldown = _base_mining_cooldown
+	inventory_capacity = _base_inventory_capacity
+
+	for raw_ore_id in saved_inventory.keys():
+		var ore_id: String = String(raw_ore_id)
+		var amount: int = maxi(0, int(saved_inventory.get(raw_ore_id, 0)))
+		if ore_id.is_empty() or amount <= 0:
+			continue
+
+		var definition_variant: Variant = ore_definitions.get(ore_id, {})
+		if not (definition_variant is Dictionary):
+			continue
+
+		var definition: Dictionary = definition_variant as Dictionary
+		var key := StringName(ore_id)
+		ore_counts[key] = amount
+		ore_values[key] = maxi(0, int(definition.get("sell_value", 0)))
+		ore_names[key] = String(definition.get("name", ore_id))
+
+	for raw_upgrade_id in saved_upgrades.keys():
+		var upgrade_id: String = String(raw_upgrade_id)
+		var definition_variant: Variant = upgrade_definitions.get(upgrade_id, {})
+		if not (definition_variant is Dictionary):
+			continue
+
+		var definition: Dictionary = definition_variant as Dictionary
+		var max_level: int = maxi(0, int(definition.get("max_level", 0)))
+		var level: int = clampi(
+			int(saved_upgrades.get(raw_upgrade_id, 0)),
+			0,
+			max_level
+		)
+		if level <= 0:
+			continue
+
+		var effect_variant: Variant = definition.get("effect", {})
+		if not (effect_variant is Dictionary):
+			continue
+
+		var applied: int = 0
+		for _index in range(level):
+			if not _apply_upgrade_effect(effect_variant as Dictionary):
+				break
+			applied += 1
+
+		if applied > 0:
+			upgrade_levels[upgrade_id] = applied
+
+	_emit_inventory_changed()
+	upgrade_state_changed.emit()
 
 
 func purchase_upgrade(upgrade_id: StringName, definition: Dictionary) -> Dictionary:
