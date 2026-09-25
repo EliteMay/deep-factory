@@ -6,7 +6,7 @@
 
 ## 現在の段階
 
-現在は **Prototype 0.1の初期実装段階** です。Phase 1の一人称3D操作、Phase 2の採掘、Phase 3の回収・売却、Phase 4のアップグレード、Phase 5の最初の自動化までWindows実機確認が完了しました。Phase 6ではセーブ・ロードを進めており、MVPのセーブモデルとRuntime Snapshotを実装済みです。次はセーブVersion互換性の判定を追加します。
+現在は **Prototype 0.1の初期実装段階** です。Phase 1の一人称3D操作、Phase 2の採掘、Phase 3の回収・売却、Phase 4のアップグレード、Phase 5の最初の自動化までWindows実機確認が完了しました。Phase 6のSave / LoadはGodot Game Foundationを使った実装まで進めています。Foundation連携とSave → Load / Backup復旧をCIで確認し、最後にWindows実機で再起動復元を確認します。
 
 最初の目標は、以下を満たす **Prototype 0.1 / MVP** の完成です。
 
@@ -30,6 +30,7 @@
 - Target: Windows
 - Version control: Git / GitHub
 - Distribution: Windows executable
+- Shared runtime foundation: Godot Game Foundation 0.8.0-dev
 - 基本方針: 可能な限り無料・Godot標準機能を優先
 
 開発バージョンは **Godot 4.7.2 stable** に固定します。Game Dev Hubの共有パックで実環境のVersionを確認し、このVersionでProjectを開けることを2026-09-24に確認済みです。
@@ -76,6 +77,7 @@
 - `docs/PROJECT_STRUCTURE.md` — プロジェクト構成
 - `docs/UPGRADE_UI.md` — Phase 4の端末UI調査・Interaction仕様
 - `docs/AUTOMATION_01.md` — Phase 5の小型採掘機・配置・回収仕様
+- `docs/FOUNDATION_INTEGRATION.md` — Godot Game Foundation導入境界と更新方針
 
 ## 開発開始
 
@@ -85,7 +87,7 @@
 - Deep FactoryはGame Dev Hubの初期登録Gameです
 - HubからRepositoryの安全確認、最新版取得、Godot Editor起動、Game直接起動を行えます
 
-Game Dev HubはDeep Factory固有の仕様を持たず、このRepositoryをSource of Truthとして扱います。
+Game Dev HubはDeep Factory固有の仕様を持たず、このRepositoryをSource of Truthとして扱います。共通Runtime基盤は `addons/game_foundation/` に導入し、`.game-foundation.json` で導入Version / Commitを追跡します。Foundation更新時もゲーム固有のScene・Script・Roadmapは自動上書きしません。
 
 ### Godotから直接開く場合
 
