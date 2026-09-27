@@ -30,6 +30,12 @@ func _run() -> void:
 	var direct_state: Dictionary = game.call("build_runtime_test_state")
 	_validate_game_state(direct_state)
 
+	game.set("_runtime_test_mode", true)
+	var isolated_save: Dictionary = game.call("save_now")
+	if String(isolated_save.get("code", "")) != "runtime_test_mode":
+		_fail("Runtime test mode must prevent save writes")
+	game.set("_runtime_test_mode", false)
+
 	var output_path: String = ProjectSettings.globalize_path(
 		"user://deep-factory-runtime-test-bridge/state.json"
 	)
