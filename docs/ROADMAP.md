@@ -262,15 +262,22 @@
   - Primary / Backupとも利用できない場合は新規状態で起動するが、そのSessionでは元Saveを自動上書きしない
 - [x] Godot Game Foundation Pilot
   - 担当: ChatGPT
-  - Foundation 0.8.0-devを `addons/game_foundation/` に導入
+  - Foundation 0.9.0-devを `addons/game_foundation/` に導入
   - `.game-foundation.json` でFoundation Version / Commit / Managed Pathを追跡
   - Input初期化をFoundation Input Systemへ移行
   - SettingsのAudio / Display / Mouse Sensitivity defaultをFoundation Settings Systemで読込・適用
   - Safe QuitをFoundation Game Flowへ接続
   - Foundation管理範囲は `addons/game_foundation/` だけとし、Game固有CodeをFoundationへ混ぜない
+- [x] Runtime Test Bridge統合
+  - 担当: ChatGPT
+  - Foundation 0.9.0-devのRuntime Test Bridgeを導入する
+  - Hubが明示したTest RunだけLocal JSON Telemetryを出力し、通常Playでは無効にする
+  - Player座標 / Camera角度 / Inventory / Money / Upgrade / Small Miner StateをJSON互換Stateとして提供する
+  - Game固有Stateの定義はDeep Factory側に残し、FoundationへDomain Fieldを固定しない
+  - Headless CIでGame Provider → Bridge Snapshotを検証する
 - [ ] Windows実機でセーブ・ロード確認
   - 担当: あなた
-  - Game Dev Hubをv0.1.12以降へ更新し、Deep FactoryのGame Foundation欄に `v0.8.0-dev` が表示されることを確認する
+  - Game Dev Hubをv0.1.12以降へ更新し、Deep FactoryのGame Foundation欄に `v0.9.0-dev` が表示されることを確認する
   - 所持金・鉱石・Upgrade・小型採掘機がある状態まで進めてゲームを終了する
   - Game Dev Hubからゲームをもう一度起動し、Player位置と主要進行が復元されることを確認する
   - 小型採掘機の設置位置と内部Storage数が再起動前と一致することを確認する
