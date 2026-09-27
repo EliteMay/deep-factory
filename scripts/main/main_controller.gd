@@ -52,6 +52,7 @@ var _placed_small_miners: int = 0
 var _auto_save_service: Node = null
 var _game_flow_service: Node = null
 var _runtime_test_bridge: Node = null
+var _runtime_test_mode: bool = false
 var _autosave_timer: Timer = null
 var _persistence_active: bool = false
 var _restoring_state: bool = false
@@ -457,6 +458,7 @@ func _on_periodic_autosave() -> void:
 func _queue_auto_save() -> void:
 	if (
 		not _persistence_active
+		or _runtime_test_mode
 		or _restoring_state
 		or _save_writes_blocked
 		or _auto_save_service == null
@@ -481,6 +483,12 @@ func _queue_auto_save() -> void:
 
 
 func save_now() -> Dictionary:
+	if _runtime_test_mode:
+		return {
+			"ok": true,
+			"code": "runtime_test_mode",
+		}
+
 	if not _persistence_active:
 		return {
 			"ok": true,
@@ -937,6 +945,9 @@ func _setup_runtime_test_bridge() -> void:
 
 	add_child(bridge)
 	_runtime_test_bridge = bridge
+	_runtime_test_mode = true
+	if _autosave_timer != null:
+		_autosave_timer.stop()
 
 
 func build_runtime_test_state() -> Dictionary:
@@ -1008,6 +1019,7 @@ func build_runtime_test_state() -> Dictionary:
 		"save": {
 			"persistenceActive": _persistence_active,
 			"writesBlocked": _save_writes_blocked,
+			"runtimeTestMode": _runtime_test_mode,
 		},
 	}
 
