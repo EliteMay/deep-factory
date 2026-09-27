@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceRepository": "EliteMay/godot-game-foundation",
-  "foundationVersion": "0.8.0-dev",
-  "foundationCommit": "12a018a2f6ef5e0a191602746068ce040caec5f9",
+  "foundationVersion": "0.9.0-dev",
+  "foundationCommit": "d49e5856d3a1a2d119d5f9abaa535c8c91c5c6ba",
   "managedPaths": [
     "addons/game_foundation"
   ],
-  "installedAt": "2026-09-25T02:15:00.000Z"
+  "installedAt": "2026-09-27T01:21:17.000Z"
 }

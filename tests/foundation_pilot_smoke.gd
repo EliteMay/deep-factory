@@ -13,8 +13,8 @@ func _ready() -> void:
 func _run() -> void:
 	_validate_installation_metadata()
 
-	if Foundation.FOUNDATION_VERSION != "0.8.0-dev":
-		_fail("Foundation version should be 0.8.0-dev")
+	if Foundation.FOUNDATION_VERSION != "0.9.0-dev":
+		_fail("Foundation version should be 0.9.0-dev")
 	if not Foundation.capabilities().has("generic_save_system"):
 		_fail("generic_save_system capability is missing")
 	if not Foundation.capabilities().has("settings_system"):
@@ -23,6 +23,8 @@ func _run() -> void:
 		_fail("input_system capability is missing")
 	if not Foundation.capabilities().has("game_flow"):
 		_fail("game_flow capability is missing")
+	if not Foundation.capabilities().has("runtime_test_bridge"):
+		_fail("runtime_test_bridge capability is missing")
 
 	for action_name in [
 		"move_forward",
@@ -91,7 +93,7 @@ func _validate_installation_metadata() -> void:
 		_fail("Foundation source repository mismatch")
 	if String(metadata.get("foundationVersion", "")) != Foundation.FOUNDATION_VERSION:
 		_fail("Foundation metadata version mismatch")
-	if String(metadata.get("foundationCommit", "")) != "12a018a2f6ef5e0a191602746068ce040caec5f9":
+	if String(metadata.get("foundationCommit", "")) != "d49e5856d3a1a2d119d5f9abaa535c8c91c5c6ba":
 		_fail("Foundation commit mismatch")
 
 	var managed_variant: Variant = metadata.get("managedPaths", [])

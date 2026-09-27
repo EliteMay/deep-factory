@@ -12,8 +12,8 @@ FoundationはGame固有Gameplayを持たない。Deep Factory固有の採掘、�
 
 現在:
 
-- Foundation Version: `0.8.0-dev`
-- Foundation Commit: `12a018a2f6ef5e0a191602746068ce040caec5f9`
+- Foundation Version: `0.9.0-dev`
+- Foundation Commit: `d49e5856d3a1a2d119d5f9abaa535c8c91c5c6ba`
 - Managed Path: `addons/game_foundation`
 
 Game Dev HubはManaged PathだけをFoundation更新対象にする。
@@ -75,6 +75,25 @@ Foundation Game Flow ServiceをRuntimeへ追加し、Safe Quit Hookから最新S
 
 Pause MenuやMain MenuはPrototype 0.1にまだ存在しないため、Foundationへ不要なGame固有Scene Contractは渡さない。
 
+### Runtime Test Bridge
+
+Foundation 0.9.0-devのRuntime Test BridgeをGame Dev Hubの固定テスト用に利用する。
+
+Deep Factory側が公開するState:
+
+- Player position / velocity
+- Camera yaw / pitch
+- Mouse capture state
+- Inventory count / capacity / ore counts
+- Money
+- Upgrade levels
+- Small Miner position / stored amount / capacity
+- Save persistence / write-block state
+
+BridgeはHubが `--foundation-test-state` と `--foundation-test-session` を付けたRunだけ有効になる。通常Playでは無効。
+
+Network Listenerや任意Command Channelは追加せず、HubがKey / Mouse入力を実行し、Game側はread-only TelemetryだけをLocal JSONへ返す。
+
 ## 更新境界
 
 Foundation更新で自動変更してよい場所:
@@ -109,5 +128,6 @@ CIでは既存Gameplay Regressionに加えて次を確認する。
 - Save → LoadでMoney / Inventory / Upgrade effect / Position / Small Minerを復元
 - Primary破損時にBackupから復旧
 - Backup復旧後もSave書込みを継続できる
+- Runtime Test BridgeがGame固有TelemetryをJSON Contractで出力できる
 
 Windows実機ではPhase 1〜5を再確認せず、今回追加したSave / Load / Foundation表示だけを確認する。
