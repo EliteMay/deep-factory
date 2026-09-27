@@ -8,6 +8,7 @@ const AutoSaveServiceScript = preload("res://addons/game_foundation/save/auto_sa
 const SettingsSystemScript = preload("res://addons/game_foundation/settings/settings_system.gd")
 const SettingsRuntimeScript = preload("res://addons/game_foundation/settings/settings_runtime.gd")
 const GameFlowServiceScript = preload("res://addons/game_foundation/flow/game_flow_service.gd")
+const RuntimeTestBridgeScript = preload("res://addons/game_foundation/testing/runtime_test_bridge.gd")
 const SmallMinerScene = preload("res://scenes/world/small_miner.tscn")
 const PlacementPreviewScene = preload("res://scenes/world/placement_preview.tscn")
 
@@ -50,6 +51,7 @@ var _placed_small_miners: int = 0
 
 var _auto_save_service: Node = null
 var _game_flow_service: Node = null
+var _runtime_test_bridge: Node = null
 var _autosave_timer: Timer = null
 var _persistence_active: bool = false
 var _restoring_state: bool = false
@@ -116,6 +118,7 @@ func _ready() -> void:
 
 	_load_saved_game()
 	_refresh_upgrade_panel()
+	_setup_runtime_test_bridge()
 
 	if player.has_method("refresh_control_state"):
 		player.call_deferred("refresh_control_state")
@@ -920,6 +923,93 @@ func build_save_snapshot() -> Dictionary:
 			machine_nodes.append(node as Node)
 
 	return SaveModelScript.build_snapshot(player, machine_nodes)
+
+
+func _setup_runtime_test_bridge() -> void:
+	var bridge := RuntimeTestBridgeScript.new()
+	var result: Dictionary = bridge.call(
+		"configure_from_command_line",
+		Callable(self, "build_runtime_test_state")
+	)
+	if not bool(result.get("enabled", false)):
+		bridge.queue_free()
+		return
+
+	add_child(bridge)
+	_runtime_test_bridge = bridge
+
+
+func build_runtime_test_state() -> Dictionary:
+	var camera_pivot_node := player.get_node_or_null("CameraPivot") as Node3D
+	var player_position: Vector3 = player.global_position
+	var player_velocity: Vector3 = player.velocity
+	var yaw: float = player.rotation.y
+	var pitch: float = (
+		camera_pivot_node.rotation.x
+		if camera_pivot_node != null
+		else 0.0
+	)
+
+	var ores: Dictionary = {}
+	var ore_counts_variant: Variant = player.get("ore_counts")
+	if ore_counts_variant is Dictionary:
+		for key in (ore_counts_variant as Dictionary).keys():
+			ores[String(key)] = int((ore_counts_variant as Dictionary).get(key, 0))
+
+	var upgrades: Dictionary = {}
+	var upgrade_levels_variant: Variant = player.get("upgrade_levels")
+	if upgrade_levels_variant is Dictionary:
+		for key in (upgrade_levels_variant as Dictionary).keys():
+			upgrades[String(key)] = int((upgrade_levels_variant as Dictionary).get(key, 0))
+
+	var machines: Array = []
+	for node in get_tree().get_nodes_in_group("small_miners"):
+		if not (node is Node3D) or not is_ancestor_of(node):
+			continue
+
+		var machine := node as Node3D
+		var machine_position: Vector3 = machine.global_position
+		machines.append({
+			"position": [
+				machine_position.x,
+				machine_position.y,
+				machine_position.z,
+			],
+			"stored": int(machine.get("stored_amount")),
+			"capacity": int(machine.get("storage_capacity")),
+		})
+
+	return {
+		"ready": true,
+		"game": "deep-factory",
+		"player": {
+			"position": [
+				player_position.x,
+				player_position.y,
+				player_position.z,
+			],
+			"velocity": [
+				player_velocity.x,
+				player_velocity.y,
+				player_velocity.z,
+			],
+			"yaw": yaw,
+			"pitch": pitch,
+			"mouseCaptured": Input.mouse_mode == Input.MOUSE_MODE_CAPTURED,
+		},
+		"inventory": {
+			"count": int(player.call("inventory_count")),
+			"capacity": int(player.get("inventory_capacity")),
+			"money": int(player.get("money")),
+			"ores": ores,
+		},
+		"upgrades": upgrades,
+		"machines": machines,
+		"save": {
+			"persistenceActive": _persistence_active,
+			"writesBlocked": _save_writes_blocked,
+		},
+	}
 
 
 func get_placed_small_miner_count() -> int:
