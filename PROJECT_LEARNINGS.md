@@ -16,3 +16,14 @@
 - Evidence:
   - PR #8 diagnostic cold start reproduced: `Identifier "UpgradeCatalog" not declared in the current scope`
   - After explicit preload fix, Direct Cold Start / Input Smoke / Upgrade Smoke / Core Loop Smoke all pass.
+
+
+## DF-002 — 固定Playtestの判定はScreenshotではなくGame StateをPrimaryにする
+
+- Date: 2026-09-27
+- Type: Testing / Runtime Integration
+- Status: Adopted
+- Evidence: UI-TARSによるWASD / Mouse固定テストはWindows上で実入力まで到達しても、Vision推論の待ち時間と画面差分判定により120秒timeoutや自己矛盾Verdictが発生した。
+- Decision: Deep FactoryはFoundation Runtime Test BridgeへPlayer / Camera / Inventory / Upgrade / Machine等のread-only Stateを提供し、固定テストのPrimary verdictを内部StateのBefore / After比較へ移す。
+- Boundary: Bridgeは明示Test Runだけ有効でNetwork / Command capabilityを持たない。Human PlaytestやScreenshotはUX / 見た目 / 未知BugのEvidenceとして残す。
+- Regression Guard: `runtime_test_bridge_integration_smoke` でGame ProviderとBridge JSON SnapshotをCI検証する。
