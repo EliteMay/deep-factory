@@ -469,3 +469,20 @@ PR #10のcommit `ed9f437e` でGodot CI run `36086867458` が成功した。
 Save / Load Testでは、保存時点のPlayer実Positionを基準に復元値を比較するよう修正し、Physicsによる床へのsettleをSave復元失敗と誤判定しないようにした。
 
 自動検証は完了。Phase 6の残りはWindows実機での再起動復元確認のみ。
+
+
+### 2026-09-27 Runtime Test Bridge Windows実機確認
+
+Game Dev Hub v0.1.24でDeep Factory commit `8cbeb87f`をWindows実機固定テストした。
+
+確認済み:
+
+- Game起動: PASS / high confidence。Runtime Test Bridgeの `ready=true` とSession一致を確認
+- WASD移動: PASS / high confidence。W 350ms入力後にPlayer positionが2.323m変化
+- マウス視点: PASS / high confidence。Mouse +80px入力後にyawが0.6875 rad変化
+- 3項目すべて `sessionMatched=true` で、Screenshot推測ではなくRuntime State差分をPrimary Evidenceとして判定
+- Repositoryは `main` / clean / ahead 0 / behind 0、Foundation表示は `v0.9.0-dev`
+
+このEvidenceでRuntime Test BridgeのWindows実機E2Eは確認済みとする。
+
+ただしPhase 6の「Windows実機でセーブ・ロード確認」は別の完了条件であり、今回のGame起動 / WASD / Mouse固定テストだけでは完了扱いにしない。次は所持金・Inventory・Upgrade・小型採掘機を作った状態で終了 → 再起動し、主要進行・Player位置・Machine位置 / Storage・復元後の継続動作を確認する。
