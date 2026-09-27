@@ -6,7 +6,7 @@
 
 ## 現在の段階
 
-現在は **Prototype 0.1の初期実装段階** です。Phase 1の一人称3D操作、Phase 2の採掘、Phase 3の回収・売却、Phase 4のアップグレード、Phase 5の最初の自動化までWindows実機確認が完了しました。Phase 6のSave / LoadはGodot Game Foundationを使った実装とCI確認まで完了しました。Save → Load、Upgrade効果・Player位置・小型採掘機の復元、Backup復旧まで自動検証済みです。Foundation 0.9.0-devのRuntime Test Bridgeも導入し、Game Dev HubからPlayer座標・Camera角度・Inventory・Upgrade・小型採掘機Stateを固定テスト用に取得できるようにしました。残るPhase 6完了条件はWindows実機での再起動復元確認です。
+現在は **Prototype 0.1の初期実装段階** です。Phase 1の一人称3D操作、Phase 2の採掘、Phase 3の回収・売却、Phase 4のアップグレード、Phase 5の最初の自動化までWindows実機確認が完了しました。Phase 6のSave / LoadはGodot Game Foundationを使った実装とCI確認まで完了しました。Save → Load、Upgrade効果・Player位置・小型採掘機の復元、Backup復旧まで自動検証済みです。Foundation 0.9.0-devのRuntime Test Bridgeも導入し、Game Dev HubからPlayer座標・Camera角度・Inventory・Upgrade・小型採掘機Stateを固定テスト用に取得できるようにしました。2026-09-27にはGame Dev Hub v0.1.24 / commit `8cbeb87f`でGame起動・WASD・Mouseの固定テスト3/3がWindows実機PASSしました。残るPhase 6完了条件はWindows実機での再起動復元確認です。
 
 最初の目標は、以下を満たす **Prototype 0.1 / MVP** の完成です。
 
