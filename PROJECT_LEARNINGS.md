@@ -27,3 +27,13 @@
 - Decision: Deep FactoryはFoundation Runtime Test BridgeへPlayer / Camera / Inventory / Upgrade / Machine等のread-only Stateを提供し、固定テストのPrimary verdictを内部StateのBefore / After比較へ移す。
 - Boundary: Bridgeは明示Test Runだけ有効でNetwork / Command capabilityを持たない。Human PlaytestやScreenshotはUX / 見た目 / 未知BugのEvidenceとして残す。
 - Regression Guard: `runtime_test_bridge_integration_smoke` でGame ProviderとBridge JSON SnapshotをCI検証する。
+
+
+## DF-003 — Runtime Test操作を本番Saveへ書き込まない
+
+- Date: 2026-09-27
+- Type: Testing / Save Safety
+- Status: Adopted
+- Problem: Hubの固定テストが実GameへWASD等を入力すると、通常Auto Save経路がTest中のPlayer位置を本番Saveへ保存し得る。
+- Decision: Runtime Test Bridgeが有効なRunではPeriodic / Event / Safe Quit Saveをno-opにし、既存Saveは読み込んでもTest操作を永続化しない。
+- Regression Guard: Runtime Test Bridge integration smokeで `save_now()` が `runtime_test_mode` を返すことを確認する。
